@@ -50,7 +50,7 @@ const SwapInput = ({
   const notEnoughBalance = +balanceValue < +inputValue && !disabled;
 
   return (
-    <Flex align="space-between" mb={4}>
+    <Flex align="space-between" bg={!disabled ? "gray.50" : undefined}>
       <Flex
         border="solid 1px"
         borderColor="gray.200"
@@ -109,6 +109,7 @@ const SwapInput = ({
                 outline={"none"}
                 background={"transparent"}
                 placeholder="0.0"
+                ml={1}
                 textAlign="right"
                 value={tempInputValue}
                 onChange={(e) => setTempInputValue(e.target.value)}
@@ -123,13 +124,14 @@ const SwapInput = ({
               whiteSpace={"nowrap"}
               visibility={address ? "visible" : "hidden"}
               maxW={"100px"}
-              _hover={{ color: "gray.800" }}
-              cursor={"pointer"}
-              onClick={() => {
+              _hover={disabled ? undefined : { color: "gray.800" }}
+              cursor={disabled ? "default" : "pointer"}
+              onClick={() =>
+                disabled ||
                 inputOnChange(
                   normalizeValue(balance, tokenInInfo?.decimals).toString(),
-                );
-              }}
+                )
+              }
             >
               Balance: {formatNumber(balanceValue)}
             </Text>

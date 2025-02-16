@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useChainId, useSwitchChain } from "wagmi";
 import {
   Box,
   Center,
   Flex,
+  IconButton,
   Link,
   Tabs,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { Settings, TriangleAlert } from "lucide-react";
+import { ArrowDown, Settings, TriangleAlert } from "lucide-react";
 import { Address } from "viem";
 import { mainnet } from "viem/chains";
 import { usePrevious } from "@uidotdev/usehooks";
@@ -251,7 +252,7 @@ const SwapWidget = ({
         <Notification />
       </Flex>
 
-      <Flex flexDirection={"column"} p={3} overflow={"hidden"} gap={2}>
+      <Flex flexDirection={"column"} p={3} overflow={"hidden"} gap={1}>
         <SwapInput
           title={"You pay"}
           limitTokens={limitInputTokens && MAINNET_ZAP_INPUT_TOKENS}
@@ -264,26 +265,44 @@ const SwapWidget = ({
           usdValue={tokenInUsdPrice}
         />
 
-        <Box>
-          <SwapInput
-            disabled
-            obligatedToken={providedTokenOut && obligateSelection}
-            title={"You receive"}
-            loading={routerLoading}
-            portalRef={portalRef}
-            tokenValue={tokenOut}
-            tokenOnChange={setTokenOut}
-            inputValue={valueOut?.toString()}
-            inputOnChange={() => {}}
-            usdValue={tokenOutUsdPrice}
-          />
+        {!obligateSelection && (
+          <Flex justifyContent="center" alignItems="center">
+            <IconButton
+              borderRadius={"full"}
+              marginY={-5}
+              zIndex={1}
+              colorPalette={"white"}
+              boxShadow={"xs"}
+              size="xs"
+              variant="subtle"
+              onClick={() => {
+                const tempTokenIn = tokenIn;
 
-          <Flex
-            justify="space-between"
-            mt={-2}
-            alignItems={"center"}
-            h={"21px"}
-          >
+                setTokenIn(tokenOut);
+                setTokenOut(tempTokenIn);
+                setValueIn(valueOut);
+              }}
+            >
+              <ArrowDown />
+            </IconButton>
+          </Flex>
+        )}
+
+        <SwapInput
+          disabled
+          obligatedToken={providedTokenOut && obligateSelection}
+          title={"You receive"}
+          loading={routerLoading}
+          portalRef={portalRef}
+          tokenValue={tokenOut}
+          tokenOnChange={setTokenOut}
+          inputValue={valueOut?.toString()}
+          inputOnChange={() => {}}
+          usdValue={tokenOutUsdPrice}
+        />
+
+        <Box>
+          <Flex justify="space-between" alignItems={"center"}>
             <Flex flexDirection={"column"} justify={"start"}>
               <Text
                 color="gray.500"

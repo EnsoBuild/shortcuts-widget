@@ -182,9 +182,19 @@ const TokenSelector = ({
         open || obligatedToken || searchedToken || setSearchText("")
       }
     >
-      <SelectTrigger noIndicator={!!obligatedToken}>
+      <SelectTrigger
+        noIndicator={!!obligatedToken}
+        borderRadius={"md"}
+        _hover={{ background: "gray.100" }}
+      >
         <SelectValueText placeholder="Select token">
-          {(tokens: Token[]) => <TokenIndicator token={tokens[0]} />}
+          {(tokens: Token[]) =>
+            tokens[0] ? (
+              <TokenIndicator token={tokens[0] || undefined} />
+            ) : (
+              "Select token"
+            )
+          }
         </SelectValueText>
       </SelectTrigger>
 
@@ -227,6 +237,7 @@ const TokenSelector = ({
                   item={token}
                   key={token.address}
                   style={style}
+                  borderRadius={"md"}
                   _hover={{ background: "gray.100" }}
                 >
                   <DetailedTokenIndicator token={token} />
