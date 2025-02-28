@@ -19,7 +19,7 @@ type RouteSegment = RouteData["route"][0];
 
 const RouteSegment = ({ step }: { step: RouteSegment }) => (
   <Flex flexDirection={"column"} alignItems={"center"} p={1} w={100}>
-    <Box>
+    <Flex flexDirection={"column"} alignItems={"center"}>
       <Text
         fontSize={"sm"}
         whiteSpace="nowrap"
@@ -29,7 +29,7 @@ const RouteSegment = ({ step }: { step: RouteSegment }) => (
       <Text color={"gray.400"} fontSize={"xs"} mt={-2}>
         ({step.action})
       </Text>
-    </Box>
+    </Flex>
     <Flex alignItems={"center"}>
       <Flex flexDirection={"column"} gap={1}>
         {step.tokenIn?.map((token, i) => (

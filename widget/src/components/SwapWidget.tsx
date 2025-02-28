@@ -269,36 +269,6 @@ const SwapWidget = ({
           usdValue={tokenInUsdPrice}
         />
 
-        {displayTokenRotation && (
-          <Flex justifyContent="center" alignItems="center">
-            <IconButton
-              borderRadius={"full"}
-              marginY={-5}
-              zIndex={1}
-              colorPalette={"white"}
-              boxShadow={"xs"}
-              size="xs"
-              variant="subtle"
-              onClick={() => {
-                const tempTokenIn = tokenIn;
-
-                if (obligateSelection)
-                  setObligatedToken((val) =>
-                    val === ObligatedToken.TokenIn
-                      ? ObligatedToken.TokenOut
-                      : ObligatedToken.TokenIn,
-                  );
-
-                setTokenIn(tokenOut);
-                setTokenOut(tempTokenIn);
-                setValueIn(valueOut);
-              }}
-            >
-              <ArrowDown />
-            </IconButton>
-          </Flex>
-        )}
-
         <SwapInput
           disabled
           obligatedToken={obligatedToken === ObligatedToken.TokenOut}
