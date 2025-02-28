@@ -36,7 +36,7 @@ const SwapInput = ({
   const { address } = useAccount();
   const balance = useTokenBalance(tokenValue);
   const tokenInInfo = useEnsoToken(tokenValue);
-  const [tempInputValue, setTempInputValue] = useState<string>("");
+  const [tempInputValue, setTempInputValue] = useState<string>(inputValue);
   const debouncedValue = useDebounce(tempInputValue, 400);
 
   useEffect(() => {

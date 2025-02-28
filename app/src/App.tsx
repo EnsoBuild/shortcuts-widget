@@ -8,7 +8,6 @@ import SwapWidget from "@ensofinance/shortcuts-widget";
 import logoUrl from "./logo_black_white.png";
 
 import "@rainbow-me/rainbowkit/styles.css";
-// import "./App.css";
 
 const EnsoApiKey = import.meta.env.VITE_ENSO_API_KEY;
 
@@ -76,7 +75,15 @@ function App() {
         }}
       >
         <div style={{ marginTop: "70px" }}>
-          <SwapWidget {...props} enableShare indicateRoute adaptive />
+          <SwapWidget
+            {...props}
+            obligateSelection
+            indicateRoute
+            adaptive
+            chainId={56} // BNB
+            tokenIn={"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"} // bnb
+            tokenOut={"0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d"} // usdc
+          />
         </div>
         <div />
       </div>

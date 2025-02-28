@@ -9,7 +9,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import { ArrowDown, Settings, TriangleAlert } from "lucide-react";
+import { ArrowDown, TriangleAlert } from "lucide-react";
 import { Address } from "viem";
 import { mainnet } from "viem/chains";
 import { usePrevious } from "@uidotdev/usehooks";
@@ -56,12 +56,15 @@ const SwapWidget = ({
   rotateObligated,
 }: WidgetProps) => {
   const [tokenIn, setTokenIn] = useState<Address>();
-  const [valueIn, setValueIn] = useState("");
+  const [valueIn, setValueIn] = useState("0.015");
   const [warningAccepted, setWarningAccepted] = useState(false);
   const [tokenOut, setTokenOut] = useState<Address>();
   const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
   const [obligatedToken, setObligatedToken] = useState(
-    obligateSelection && (rotateObligated ?? ObligatedToken.TokenOut),
+    obligateSelection &&
+      (typeof rotateObligated !== "undefined"
+        ? +rotateObligated
+        : ObligatedToken.TokenIn),
   );
 
   const chainId = usePriorityChainId();
@@ -307,6 +310,12 @@ const SwapWidget = ({
           inputValue={valueOut?.toString()}
           inputOnChange={() => {}}
           usdValue={tokenOutUsdPrice}
+          limitTokens={[
+            "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // USDC
+            "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c", // WBNB
+            "0xa07c5b74c9b40447a954e1466938b865b6bbea36", // vBNB
+            "0x55d398326f99059ff775485246999027b3197955", // USDT
+          ]}
         />
 
         <Box>
