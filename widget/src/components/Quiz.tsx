@@ -52,7 +52,7 @@ export const useQuiz = () => {
   const setNotification = useStore((state) => state.setNotification);
   const notification = useStore((state) => state.notification);
   const [quizCompleted, setQuizCompleted] = useLocalStorage<boolean>(
-    "security-quiz-completed",
+    "quizz-completed",
     false,
   );
 
@@ -121,6 +121,12 @@ export const Quiz = ({ onComplete }: QuizProps) => {
   >(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasFoundCorrectAnswer, setHasFoundCorrectAnswer] = useState(false);
+  const [fadeIn, setFadeIn] = useState(true);
+
+  // Define colors
+  const bgColor = "white";
+  const borderColor = "gray.200";
+  const highlightColor = "blue.50";
 
   const handleRadioChange = (event: React.FormEvent<HTMLDivElement>) => {
     const target = event.target as HTMLInputElement;
@@ -150,6 +156,7 @@ export const Quiz = ({ onComplete }: QuizProps) => {
     const newAnswers = [...answers, answerIndex];
 
     setIsProcessing(true);
+    setFadeIn(false);
 
     // Add a delay before moving to the next question
     setTimeout(() => {
@@ -160,6 +167,7 @@ export const Quiz = ({ onComplete }: QuizProps) => {
         setSelectedOption(null);
         setAnswerStatus(null);
         setHasFoundCorrectAnswer(false);
+        setFadeIn(true);
       } else {
         // Quiz completed
         if (onComplete) {
@@ -167,73 +175,178 @@ export const Quiz = ({ onComplete }: QuizProps) => {
         }
       }
       setIsProcessing(false);
-    }, 1000); // Add a delay for all answers since user has found the correct one
+    }, 500); // Reduced delay for better UX
   };
 
   const question = quizQuestions[currentQuestion];
+  const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
 
   return (
-    <Box w="100%" maxW="500px" p={4}>
-      <VStack gap={6} align="stretch">
-        <Text fontWeight="bold">{question.question}</Text>
-
-        <RadioGroup value={selectedOption} onChange={handleRadioChange}>
-          <VStack gap={4} align={"start"}>
-            {question.options.map((option, index) => {
-              const isSelected = selectedOption === index.toString();
-              const isCorrectAnswer =
-                index === quizQuestions[currentQuestion].correctAnswer;
-
-              // Determine color based on selection and correctness
-              let textColor = "";
-
-              if (isSelected && answerStatus === "correct") {
-                textColor = "green.500";
-              } else if (isSelected && answerStatus === "incorrect") {
-                textColor = "red.500";
-              }
-
-              // Highlight the correct answer when user made a wrong choice
-              if (
-                isCorrectAnswer &&
-                answerStatus === "incorrect" &&
-                hasFoundCorrectAnswer
-              ) {
-                textColor = "green.500";
-              }
-
-              return (
-                <Radio
-                  key={index}
-                  value={index.toString()}
-                  color={textColor}
-                  fontWeight={textColor ? "bold" : "normal"}
-                  // Only disable options if correct answer is already found
-                  disabled={hasFoundCorrectAnswer}
-                >
-                  {option}
-                </Radio>
-              );
-            })}
-          </VStack>
-        </RadioGroup>
-
-        <Flex justify="flex-end">
-          <Button
-            colorScheme={
-              answerStatus === "correct"
-                ? "green"
-                : answerStatus === "incorrect"
-                  ? "red"
-                  : "blue"
-            }
-            disabled={
-              selectedOption === null || isProcessing || !hasFoundCorrectAnswer
-            }
-            onClick={handleNext}
+    <Box
+      w="112%"
+      maxW="550px"
+      p={5}
+      borderRadius="xl"
+      boxShadow="lg"
+      bg={bgColor}
+      borderWidth="1px"
+      borderColor={borderColor}
+    >
+      <VStack gap={5} align="stretch">
+        <Box>
+          <Flex justify="space-between" align="center" mb={2}>
+            <Box
+              bg="blue.500"
+              color="white"
+              px={2}
+              py={1}
+              borderRadius="md"
+              fontSize="sm"
+              fontWeight="medium"
+            >
+              Question {currentQuestion + 1} of {quizQuestions.length}
+            </Box>
+            <Text fontSize="sm" color="gray.500">
+              {progress.toFixed(0)}% Complete
+            </Text>
+          </Flex>
+          <Box
+            w="100%"
+            h="4px"
+            bg="gray.100"
+            borderRadius="full"
+            mb={4}
+            overflow="hidden"
           >
-            {currentQuestion < quizQuestions.length - 1 ? "Next" : "Complete"}
-          </Button>
+            <Box
+              h="100%"
+              bg="blue.500"
+              borderRadius="full"
+              w={`${progress}%`}
+            />
+          </Box>
+        </Box>
+
+        <Box>
+          <Text fontWeight="bold" fontSize="lg" mb={4} lineHeight="1.4">
+            {question.question}
+          </Text>
+        </Box>
+
+        <Box borderTopWidth="1px" borderColor="gray.200" my={2} />
+
+        <Box>
+          <RadioGroup value={selectedOption} onChange={handleRadioChange}>
+            <VStack gap={4} align={"start"}>
+              {question.options.map((option, index) => {
+                const isSelected = selectedOption === index.toString();
+                const isCorrectAnswer =
+                  index === quizQuestions[currentQuestion].correctAnswer;
+
+                // Determine color based on selection and correctness
+                let textColor = "inherit";
+                let bgOptionColor = isSelected ? highlightColor : "transparent";
+                let borderOptionColor = isSelected ? "blue.500" : borderColor;
+
+                if (isSelected && answerStatus === "correct") {
+                  textColor = "green.500";
+                  bgOptionColor = "green.50";
+                  borderOptionColor = "green.500";
+                } else if (isSelected && answerStatus === "incorrect") {
+                  textColor = "red.500";
+                  bgOptionColor = "red.50";
+                  borderOptionColor = "red.500";
+                }
+
+                // Highlight the correct answer when user made a wrong choice
+                if (
+                  isCorrectAnswer &&
+                  answerStatus === "incorrect" &&
+                  hasFoundCorrectAnswer
+                ) {
+                  textColor = "green.500";
+                }
+
+                return (
+                  <Box
+                    key={index}
+                    w="100%"
+                    p={3}
+                    borderWidth="1px"
+                    borderRadius="md"
+                    borderColor={borderOptionColor}
+                    bg={bgOptionColor}
+                    _hover={{
+                      borderColor: hasFoundCorrectAnswer
+                        ? undefined
+                        : "blue.300",
+                      bg: hasFoundCorrectAnswer ? undefined : highlightColor,
+                      transform: hasFoundCorrectAnswer
+                        ? undefined
+                        : "translateY(-2px)",
+                    }}
+                  >
+                    <Radio
+                      value={index.toString()}
+                      color={textColor}
+                      fontWeight={textColor !== "inherit" ? "bold" : "normal"}
+                      disabled={hasFoundCorrectAnswer}
+                    >
+                      {option}
+                    </Radio>
+                  </Box>
+                );
+              })}
+            </VStack>
+          </RadioGroup>
+        </Box>
+
+        <Flex justify="space-between" pt={4}>
+          <Text
+            fontSize="sm"
+            color={
+              answerStatus === "correct"
+                ? "green.500"
+                : answerStatus === "incorrect"
+                  ? "red.500"
+                  : "transparent"
+            }
+            fontWeight="bold"
+            opacity={answerStatus ? 1 : 0}
+          >
+            {answerStatus === "correct"
+              ? "Correct! 🎉"
+              : answerStatus === "incorrect"
+                ? "Try again!"
+                : ""}
+          </Text>
+          <Box position="relative">
+            <Button
+              colorScheme={
+                answerStatus === "correct"
+                  ? "green"
+                  : answerStatus === "incorrect"
+                    ? "red"
+                    : "blue"
+              }
+              disabled={
+                selectedOption === null ||
+                isProcessing ||
+                !hasFoundCorrectAnswer
+              }
+              onClick={handleNext}
+              position="relative"
+              overflow="hidden"
+              _hover={{
+                transform: hasFoundCorrectAnswer
+                  ? "translateY(-2px)"
+                  : undefined,
+                boxShadow: hasFoundCorrectAnswer ? "md" : undefined,
+              }}
+            >
+              {currentQuestion < quizQuestions.length - 1 ? "Next" : "Complete"}
+            </Button>
+          </Box>
         </Flex>
       </VStack>
     </Box>
