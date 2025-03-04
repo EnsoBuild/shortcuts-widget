@@ -52,7 +52,7 @@ export const useQuiz = () => {
   const setNotification = useStore((state) => state.setNotification);
   const notification = useStore((state) => state.notification);
   const [quizCompleted, setQuizCompleted] = useLocalStorage<boolean>(
-    "quizz-completed",
+    "quiz-completed",
     false,
   );
 
