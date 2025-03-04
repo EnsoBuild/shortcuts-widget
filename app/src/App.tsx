@@ -79,7 +79,7 @@ function App() {
             {...props}
             indicateRoute
             adaptive
-            chainId={56} // BNB
+            chainId={56} // Always use BNB chain
             tokenIn={"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"} // bnb
             tokenOut={"0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c"} // wbnb
           />

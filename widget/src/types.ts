@@ -17,6 +17,7 @@ export enum NotifyType {
   Loading = "loading",
   Warning = "warning",
   Blocked = "blocked",
+  Quiz = "quiz",
 }
 
 export enum ObligatedToken {

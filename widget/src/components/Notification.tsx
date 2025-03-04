@@ -14,8 +14,8 @@ import {
   ProgressCircleRing,
   ProgressCircleRoot,
 } from "@/components/ui/progress-circle";
+import { Quiz, useQuiz } from "@/components/Quiz";
 import { NotifyType } from "@/types";
-import { useEffect } from "react";
 
 const NOTIFICATION_COLORS = {
   [NotifyType.Success]: "green.500",
@@ -23,6 +23,8 @@ const NOTIFICATION_COLORS = {
   [NotifyType.Info]: "blue.400",
   [NotifyType.Loading]: "blue.400",
   [NotifyType.Warning]: "yellow.400",
+  [NotifyType.Blocked]: "red.400",
+  [NotifyType.Quiz]: "blue.400",
 };
 
 const NotificationIcons = {
@@ -31,6 +33,7 @@ const NotificationIcons = {
   [NotifyType.Info]: Info,
   [NotifyType.Warning]: TriangleAlert,
   [NotifyType.Blocked]: ShieldAlert,
+  [NotifyType.Quiz]: Info,
 };
 
 const getIcon = (variant: NotifyType) => {
@@ -42,6 +45,10 @@ const getIcon = (variant: NotifyType) => {
         </ProgressCircleRoot>
       </Center>
     );
+  }
+
+  if (variant === NotifyType.Quiz) {
+    return null;
   }
 
   const Component = NotificationIcons[variant];
@@ -56,14 +63,7 @@ const getIcon = (variant: NotifyType) => {
 export const Notification = () => {
   const notification = useStore((state) => state.notification);
   const setNotification = useStore((state) => state.setNotification);
-  // Testing purposes
-  // useEffect(() => {
-  //   setNotification({
-  //     variant: NotifyType.Blocked,
-  //     message: "Go direct to Uniswap interface",
-  //     link: "https://basescan.org/tx/0xf7fd0e5153288af243be2dbc97884a766ca316d49a908bdd01191a3a8f8ac95f",
-  //   });
-  // }, []);
+  const { handleQuizComplete } = useQuiz();
 
   if (!notification) return null;
 
@@ -72,23 +72,24 @@ export const Notification = () => {
   return (
     <Center w={"full"} h={"full"}>
       <Flex
-        width={"95%"}
-        height={"95%"}
+        width={"100%"}
+        height={"100%"}
         p={5}
         boxShadow={"lg"}
         zIndex={1000}
         background={"white"}
         flexDirection={"column"}
       >
-        {notification.variant !== NotifyType.Blocked && (
-          <CloseButton
-            position={"absolute"}
-            top={10}
-            right={5}
-            onClick={handleClose}
-            mr={5}
-          />
-        )}
+        {notification.variant !== NotifyType.Blocked &&
+          notification.variant !== NotifyType.Quiz && (
+            <CloseButton
+              position={"absolute"}
+              top={10}
+              right={5}
+              onClick={handleClose}
+              mr={5}
+            />
+          )}
         <Flex
           flexDirection={"column"}
           width={"full"}
@@ -97,24 +98,38 @@ export const Notification = () => {
           alignItems={"center"}
           gap={2}
         >
-          {getIcon(notification.variant)}
+          {notification.variant === NotifyType.Quiz ? (
+            <>
+              <Text fontSize={"xl"} mb={4}>
+                {notification.message ||
+                  "Answer the following questions to continue"}
+              </Text>
+              <Quiz onComplete={handleQuizComplete} />
+            </>
+          ) : (
+            <>
+              {getIcon(notification.variant)}
 
-          <Text
-            fontSize={notification.variant === NotifyType.Warning ? "lg" : "xl"}
-          >
-            {notification.message}
-          </Text>
+              <Text
+                fontSize={
+                  notification.variant === NotifyType.Warning ? "lg" : "xl"
+                }
+              >
+                {notification.message}
+              </Text>
 
-          {notification.variant !== NotifyType.Blocked && (
-            <Button mt={5} w={200} variant={"subtle"} onClick={handleClose}>
-              Close
-            </Button>
-          )}
-          {notification.link && (
-            <Link href={notification.link} target={"_blank"}>
-              View details
-              <ExternalLink size={14} />
-            </Link>
+              {notification.variant !== NotifyType.Blocked && (
+                <Button mt={5} w={200} variant={"subtle"} onClick={handleClose}>
+                  Close
+                </Button>
+              )}
+              {notification.link && (
+                <Link href={notification.link} target={"_blank"}>
+                  View details
+                  <ExternalLink size={14} />
+                </Link>
+              )}
+            </>
           )}
         </Flex>
       </Flex>

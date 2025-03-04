@@ -1,4 +1,7 @@
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  RainbowKitProvider,
+  connectorsForWallets,
+} from "@rainbow-me/rainbowkit";
 import {
   base,
   mainnet,
@@ -14,8 +17,8 @@ import {
   sonic,
 } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
-import React from "react";
+import { WagmiProvider, createConfig } from "wagmi";
+import { binanceWallet } from "@rainbow-me/rainbowkit/wallets";
 
 const berachainWithIcon = {
   ...berachain,
@@ -28,10 +31,25 @@ const sonicWithIcon = {
     "https://assets.coingecko.com/coins/images/38108/standard/200x200_Sonic_Logo.png",
 };
 
-const config = getDefaultConfig({
-  appName: "My RainbowKit App",
-  projectId: "YOUR_PROJECT_ID",
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: "wallets:",
+      wallets: [binanceWallet],
+    },
+  ],
+  {
+    appName: "My RainbowKit App",
+    projectId: "YOUR_PROJECT_ID",
+  },
+);
+
+// @ts-expect-error no transport
+const config = createConfig({
+  multiInjectedProviderDiscovery: false,
+  connectors,
   chains: [
+    bsc,
     mainnet,
     base,
     arbitrum,
@@ -39,7 +57,6 @@ const config = getDefaultConfig({
     sonicWithIcon,
     zksync,
     optimism,
-    bsc,
     avalanche,
     gnosis,
     polygon,
