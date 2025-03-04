@@ -100,10 +100,6 @@ export const Notification = () => {
         >
           {notification.variant === NotifyType.Quiz ? (
             <>
-              <Text fontSize={"xl"} mb={4}>
-                {notification.message ||
-                  "Answer the following questions to continue"}
-              </Text>
               <Quiz onComplete={handleQuizComplete} />
             </>
           ) : (
