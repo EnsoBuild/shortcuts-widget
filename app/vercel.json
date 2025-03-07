@@ -1,9 +1,0 @@
-{
-  "trailingSlash": false,
-  "rewrites": [
-    {
-      "source": "/widget/:path*",
-      "destination": "/:path*"
-    }
-  ]
-}
