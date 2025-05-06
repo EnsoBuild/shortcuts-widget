@@ -29,8 +29,8 @@ const sonicWithIcon = {
 };
 
 const config = getDefaultConfig({
-  appName: "My RainbowKit App",
-  projectId: "YOUR_PROJECT_ID",
+  appName: "Enso-widget",
+  projectId: import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "",
   chains: [
     mainnet,
     base,
