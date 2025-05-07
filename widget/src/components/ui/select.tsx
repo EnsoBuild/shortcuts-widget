@@ -17,7 +17,7 @@ export const SelectTrigger = React.forwardRef<
   const { children, clearable, noIndicator, ...rest } = props;
   return (
     <ChakraSelect.Control {...rest}>
-      <ChakraSelect.Trigger ref={ref}>{children}</ChakraSelect.Trigger>
+      <ChakraSelect.Trigger ref={ref} _hover={{ background: "bg.subtle" }} opacity={"1 !important"}>{children}</ChakraSelect.Trigger>
       <ChakraSelect.IndicatorGroup>
         {clearable && <SelectClearTrigger />}
         {noIndicator || <ChakraSelect.Indicator />}

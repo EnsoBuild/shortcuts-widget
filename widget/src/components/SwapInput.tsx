@@ -50,10 +50,10 @@ const SwapInput = ({
   const notEnoughBalance = +balanceValue < +inputValue && !disabled;
 
   return (
-    <Flex align="space-between" bg={!disabled ? "gray.50" : undefined}>
+    <Flex align="space-between" bg={!disabled ? "bg" : undefined}>
       <Flex
         border="solid 1px"
-        borderColor="gray.200"
+        borderColor="border.emphasized"
         borderRadius="md"
         p={2}
         align="center"

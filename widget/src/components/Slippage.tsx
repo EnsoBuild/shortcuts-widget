@@ -60,7 +60,7 @@ const Slippage = ({
           <Settings size={10} />
         </Flex>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent bg={"bg.subtle"}>
         <PopoverArrow />
         <PopoverBody p={2}>
           <Flex gap={1}>
@@ -75,8 +75,9 @@ const Slippage = ({
                 onClick={() => setDefaultSlippage(value)}
                 padding={2}
                 flex={1}
-                border="1px solid #E2E8F0"
-                backgroundColor={slippage === value ? "#EDF2F7" : "transparent"}
+                border="1px solid"
+                borderColor="border.emphasized"
+                backgroundColor={slippage === value ? "bg" : "transparent"}
                 borderRadius={"md"}
                 cursor={"pointer"}
               >

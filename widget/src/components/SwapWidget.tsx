@@ -230,7 +230,7 @@ const SwapWidget = ({
     <Box
       position={"relative"}
       border="solid 1px"
-      borderColor="gray.200"
+      borderColor="border.emphasized"
       borderRadius="md"
       width={adaptive ? { base: "100%", md: "450px" } : "100%"}
     >
@@ -418,7 +418,7 @@ const SwapWidget = ({
           <Center w={"full"}>
             <Text color={"gray.500"} fontSize={"sm"}>
               Powered by{" "}
-              <Link target={"_blank"} href={"https://www.enso.build/"}>
+              <Link target={"_blank"} href={"https://www.enso.build/"} color={"fg.muted"}>
                 Enso
               </Link>
             </Text>

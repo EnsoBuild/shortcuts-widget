@@ -178,6 +178,7 @@ const TokenSelector = ({
       onValueChange={({ value }) => onChange(value[0] as string)}
       size="sm"
       minWidth="120px"
+      variant="outline"
       onOpenChange={({ open }) =>
         open || obligatedToken || searchedToken || setSearchText("")
       }
@@ -185,7 +186,6 @@ const TokenSelector = ({
       <SelectTrigger
         noIndicator={!!obligatedToken}
         borderRadius={"md"}
-        _hover={{ background: "gray.100" }}
       >
         <SelectValueText placeholder="Select token">
           {(tokens: Token[]) =>
@@ -203,6 +203,7 @@ const TokenSelector = ({
         w={"100%"}
         minWidth={"300px"}
         minHeight={"400px"}
+        bg={"bg"}
       >
         <Flex
           height={"100%"}
@@ -238,7 +239,7 @@ const TokenSelector = ({
                   key={token.address}
                   style={style}
                   borderRadius={"md"}
-                  _hover={{ background: "gray.100" }}
+                  _hover={{ background: "bg.subtle" }}
                 >
                   <DetailedTokenIndicator token={token} />
                 </SelectItem>

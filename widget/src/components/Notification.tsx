@@ -77,8 +77,8 @@ export const Notification = () => {
         p={5}
         boxShadow={"lg"}
         zIndex={1000}
-        background={"white"}
         flexDirection={"column"}
+        bg={"bg.subtle"}
       >
         {notification.variant !== NotifyType.Blocked && (
           <CloseButton
@@ -106,12 +106,12 @@ export const Notification = () => {
           </Text>
 
           {notification.variant !== NotifyType.Blocked && (
-            <Button mt={5} w={200} variant={"subtle"} onClick={handleClose}>
+            <Button mt={5} w={200} colorPalette={"black"} onClick={handleClose} >
               Close
             </Button>
           )}
           {notification.link && (
-            <Link href={notification.link} target={"_blank"}>
+            <Link href={notification.link} target={"_blank"} color={"fg.muted"}>
               View details
               <ExternalLink size={14} />
             </Link>
