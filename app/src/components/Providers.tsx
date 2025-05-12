@@ -12,6 +12,7 @@ import {
   polygon,
   berachain,
   sonic,
+  plume
 } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
@@ -26,6 +27,11 @@ const sonicWithIcon = {
   ...sonic,
   iconUrl:
     "https://assets.coingecko.com/coins/images/38108/standard/200x200_Sonic_Logo.png",
+};
+const plumeWithIcon= {
+  ...plume,
+  iconUrl:
+    "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
 };
 
 const config = getDefaultConfig({
