@@ -70,6 +70,15 @@ const SONIC_TOKEN: Token = {
     "https://assets.coingecko.com/coins/images/38108/standard/200x200_Sonic_Logo.png",
 };
 
+const PLUME_TOKEN: Token = {
+  address: ETH_ADDRESS,
+  name: "Plume",
+  symbol: "PLUME",
+  decimals: 18,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
+};
+
 export enum SupportedChainId {
   MAINNET = 1,
   ARBITRUM_ONE = 42161,
@@ -86,6 +95,7 @@ export enum SupportedChainId {
   AVALANCHE = 43114,
   BERACHAIN = 80094,
   SONIC = 146,
+  PLUME = 98866,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
@@ -110,6 +120,7 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.AVALANCHE]: "avalanche",
   [SupportedChainId.BERACHAIN]: "berachain",
   [SupportedChainId.SONIC]: "sonic",
+  [SupportedChainId.PLUME]: "plume",
 };
 
 export const MOCK_IMAGE_URL =
@@ -131,6 +142,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.AVALANCHE]: "https://cchain.explorer.avax.network",
   [SupportedChainId.BERACHAIN]: "https://berascan.com",
   [SupportedChainId.SONIC]: "https://sonicscan.io",
+  [SupportedChainId.PLUME]: "https://explorer.plume.network",
 };
 
 export const USDC_ADDRESS: Record<SupportedChainId, Address> = {
@@ -146,6 +158,7 @@ export const USDC_ADDRESS: Record<SupportedChainId, Address> = {
   [bsc.id]: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
   [SupportedChainId.BERACHAIN]: "0x549943e04f40284185054145c6e4e9568c1d3241",
   [SupportedChainId.SONIC]: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+  [SupportedChainId.PLUME]: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6", // USDC on Plume
 };
 
 export const NATIVE_ETH_CHAINS = [
@@ -170,6 +183,7 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.BERACHAIN]: BERA_TOKEN,
   [SupportedChainId.GNOSIS]: DAI_TOKEN,
   [SupportedChainId.SONIC]: SONIC_TOKEN,
+  [SupportedChainId.PLUME]: PLUME_TOKEN,
 };
 
 export const SWAP_LIMITS: Record<Address, number> = {

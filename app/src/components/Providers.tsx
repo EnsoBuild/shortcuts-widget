@@ -11,8 +11,9 @@ import {
   gnosis,
   polygon,
   berachain,
-  sonic,
+  sonic
 } from "viem/chains";
+import { plume } from "../chains/plume";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import React from "react";
@@ -27,6 +28,11 @@ const sonicWithIcon = {
   iconUrl:
     "https://assets.coingecko.com/coins/images/38108/standard/200x200_Sonic_Logo.png",
 };
+const plumeWithIcon= {
+  ...plume,
+  iconUrl:
+    "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
+};
 
 const config = getDefaultConfig({
   appName: "Enso-widget",
@@ -37,6 +43,7 @@ const config = getDefaultConfig({
     arbitrum,
     berachainWithIcon,
     sonicWithIcon,
+    plumeWithIcon,
     zksync,
     optimism,
     bsc,

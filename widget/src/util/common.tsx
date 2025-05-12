@@ -103,6 +103,60 @@ const sonicAdditionalTokens = // TODO: remove after it comes in list for sonic
     ]),
   );
 
+const plumeAdditionalTokens = // Additional tokens for Plume network
+  new Promise<Token[]>((resolve) =>
+    resolve([
+      {
+        address: ETH_ADDRESS, // Native token address
+        name: "Plume",
+        symbol: "PLUME",
+        decimals: 18,
+        logoURI:
+          "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
+      },
+      {
+        address: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6",
+        name: "USD Coin",
+        symbol: "USDC",
+        decimals: 6,
+        logoURI:
+          "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+      },
+      {
+        address: "0x78adD880A697070c1e765Ac44D65323a0DcCE913",
+        name: "USD Coin.e",
+        symbol: "USDC.e",
+        decimals: 6,
+        logoURI:
+          "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+      },
+      {
+        address: "0xEa237441c92CAe6FC17Caaf9a7acB3f953be4bd1",
+        name: "Wrapped Plume",
+        symbol: "wPlume",
+        decimals: 18,
+        logoURI:
+          "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
+      },
+      {
+        address: "0xca59cA09E5602fAe8B629DeE83FfA819741f14be",
+        name: "Wrapped Ether",
+        symbol: "WETH",
+        decimals: 18,
+        logoURI:
+          "https://assets.coingecko.com/coins/images/2518/large/weth.png",
+      },
+      {
+        address: "0x3fE62c879EA1E4Ce3EB8d7e0dDB2D6A69d8AeC05",
+        name: "myWPLUME", // remove once is in some list
+        symbol: "myWPLUME",
+        decimals: 18,
+        logoURI:
+          "https://icons.llamao.fi/icons/protocols/mystic-finance",
+      }
+    ]),
+  );
+
 const getCurrentChainTokens = (chainId: SupportedChainId) => {
   let getters: Promise<Token[] | undefined>[] = [];
 
@@ -112,6 +166,9 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       break;
     case SupportedChainId.SONIC:
       getters = [getGeckoList(chainId), sonicAdditionalTokens];
+      break;
+    case SupportedChainId.PLUME:
+      getters = [plumeAdditionalTokens];
       break;
     default:
       // priority for oneInch tokens
