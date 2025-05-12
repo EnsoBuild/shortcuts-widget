@@ -107,6 +107,14 @@ const plumeAdditionalTokens = // Additional tokens for Plume network
   new Promise<Token[]>((resolve) =>
     resolve([
       {
+        address: ETH_ADDRESS, // Native token address
+        name: "Plume",
+        symbol: "PLUME",
+        decimals: 18,
+        logoURI:
+          "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
+      },
+      {
         address: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6",
         name: "USD Coin",
         symbol: "USDC",
