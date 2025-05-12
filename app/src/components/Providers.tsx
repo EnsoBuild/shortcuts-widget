@@ -11,9 +11,9 @@ import {
   gnosis,
   polygon,
   berachain,
-  sonic,
-  plume
+  sonic
 } from "viem/chains";
+import { plume } from "../chains/plume";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import React from "react";
@@ -43,6 +43,7 @@ const config = getDefaultConfig({
     arbitrum,
     berachainWithIcon,
     sonicWithIcon,
+    plumeWithIcon,
     zksync,
     optimism,
     bsc,

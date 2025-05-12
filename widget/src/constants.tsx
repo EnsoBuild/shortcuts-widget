@@ -95,7 +95,7 @@ export enum SupportedChainId {
   AVALANCHE = 43114,
   BERACHAIN = 80094,
   SONIC = 146,
-  PLUME = 161221,
+  PLUME = 98866,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
