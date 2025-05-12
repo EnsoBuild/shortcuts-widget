@@ -146,6 +146,14 @@ const plumeAdditionalTokens = // Additional tokens for Plume network
         logoURI:
           "https://assets.coingecko.com/coins/images/2518/large/weth.png",
       },
+      {
+        address: "0x3fE62c879EA1E4Ce3EB8d7e0dDB2D6A69d8AeC05",
+        name: "myWPLUME", // remove once is in some list
+        symbol: "myWPLUME",
+        decimals: 18,
+        logoURI:
+          "https://icons.llamao.fi/icons/protocols/mystic-finance",
+      }
     ]),
   );
 
