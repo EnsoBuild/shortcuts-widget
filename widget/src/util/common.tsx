@@ -151,9 +151,8 @@ const plumeAdditionalTokens = // Additional tokens for Plume network
         name: "myWPLUME", // remove once is in some list
         symbol: "myWPLUME",
         decimals: 18,
-        logoURI:
-          "https://icons.llamao.fi/icons/protocols/mystic-finance",
-      }
+        logoURI: "https://icons.llamao.fi/icons/protocols/mystic-finance",
+      },
     ]),
   );
 
@@ -169,6 +168,11 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       break;
     case SupportedChainId.PLUME:
       getters = [plumeAdditionalTokens];
+      break;
+    case SupportedChainId.INK:
+    case SupportedChainId.UNICHAIN:
+    case SupportedChainId.SONEIUM:
+      getters = [getGeckoList(chainId)];
       break;
     default:
       // priority for oneInch tokens

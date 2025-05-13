@@ -21,7 +21,7 @@
     "react-icons": "^5.4.0",
     "react-router-dom": "^7.1.5",
     "url": "^0.11.4",
-    "viem": "~2.23.0",
+    "viem": "~2.29.2",
     "wagmi": "^2.14.6"
   },
   "devDependencies": {

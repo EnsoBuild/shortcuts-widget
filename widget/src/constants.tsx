@@ -1,16 +1,16 @@
 import { Address } from "viem";
-import {
-  arbitrum,
-  avalanche,
-  base,
-  bsc,
-  gnosis,
-  linea,
-  mainnet,
-  optimism,
-  polygon,
-  zksync,
-} from "viem/chains";
+// import {
+//   arbitrum,
+//   avalanche,
+//   base,
+//   bsc,
+//   gnosis,
+//   linea,
+//   mainnet,
+//   optimism,
+//   polygon,
+//   zksync,
+// } from "viem/chains";
 import { Token } from "@/util/common";
 
 export const ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
@@ -96,6 +96,9 @@ export enum SupportedChainId {
   BERACHAIN = 80094,
   SONIC = 146,
   PLUME = 98866,
+  INK = 57073,
+  UNICHAIN = 130,
+  SONEIUM = 1868,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
@@ -121,6 +124,9 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.BERACHAIN]: "berachain",
   [SupportedChainId.SONIC]: "sonic",
   [SupportedChainId.PLUME]: "plume",
+  [SupportedChainId.INK]: "ink",
+  [SupportedChainId.UNICHAIN]: "unichain",
+  [SupportedChainId.SONEIUM]: "soneium",
 };
 
 export const MOCK_IMAGE_URL =
@@ -143,23 +149,29 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.BERACHAIN]: "https://berascan.com",
   [SupportedChainId.SONIC]: "https://sonicscan.io",
   [SupportedChainId.PLUME]: "https://explorer.plume.network",
+  [SupportedChainId.INK]: "https://explorer.inkonchain.com",
+  [SupportedChainId.UNICHAIN]: "https://uniscan.xyz",
+  [SupportedChainId.SONEIUM]: "https://soneium.blockscout.com/",
 };
 
-export const USDC_ADDRESS: Record<SupportedChainId, Address> = {
-  [mainnet.id]: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-  [arbitrum.id]: "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
-  [base.id]: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-  [zksync.id]: "0x1d17cbcf0d6d143135ae902365d2e5e2a16538d4",
-  [optimism.id]: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
-  [linea.id]: "0x176211869ca2b568f2a7d4ee941e073a821ee1ff",
-  [polygon.id]: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
-  [avalanche.id]: "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e",
-  [gnosis.id]: "0xddafbb505ad214d7b80b1f830fccc89b60fb7a83",
-  [bsc.id]: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
-  [SupportedChainId.BERACHAIN]: "0x549943e04f40284185054145c6e4e9568c1d3241",
-  [SupportedChainId.SONIC]: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
-  [SupportedChainId.PLUME]: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6", // USDC on Plume
-};
+// export const USDC_ADDRESS: Record<SupportedChainId, Address> = {
+//   [mainnet.id]: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+//   [arbitrum.id]: "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+//   [base.id]: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+//   [zksync.id]: "0x1d17cbcf0d6d143135ae902365d2e5e2a16538d4",
+//   [optimism.id]: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+//   [linea.id]: "0x176211869ca2b568f2a7d4ee941e073a821ee1ff",
+//   [polygon.id]: "0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
+//   [avalanche.id]: "0xb97ef9ef8734c71904d8002f8b6bc66dd9c48a6e",
+//   [gnosis.id]: "0xddafbb505ad214d7b80b1f830fccc89b60fb7a83",
+//   [bsc.id]: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+//   [SupportedChainId.BERACHAIN]: "0x549943e04f40284185054145c6e4e9568c1d3241",
+//   [SupportedChainId.SONIC]: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d",
+//   [SupportedChainId.PLUME]: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6", // USDC on Plume
+//   [SupportedChainId.INK]: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6", // USDC on Ink
+//     [SupportedChainId.UNICHAIN]: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6", // USDC on Unichain
+//   [SupportedChainId.SONEIUM]: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6", // USDC on Soneium
+// };
 
 export const NATIVE_ETH_CHAINS = [
   SupportedChainId.MAINNET,
@@ -168,6 +180,9 @@ export const NATIVE_ETH_CHAINS = [
   SupportedChainId.BASE,
   SupportedChainId.LINEA,
   SupportedChainId.ZKSYNC,
+  SupportedChainId.SONEIUM,
+  SupportedChainId.UNICHAIN,
+  SupportedChainId.INK,
 ];
 
 export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
@@ -177,6 +192,9 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.BASE]: ETH_TOKEN,
   [SupportedChainId.LINEA]: ETH_TOKEN,
   [SupportedChainId.ZKSYNC]: ETH_TOKEN,
+  [SupportedChainId.SONEIUM]: ETH_TOKEN,
+  [SupportedChainId.UNICHAIN]: ETH_TOKEN,
+  [SupportedChainId.INK]: ETH_TOKEN,
   [SupportedChainId.BSC]: BNB_TOKEN,
   [SupportedChainId.AVALANCHE]: AVAX_TOKEN,
   [SupportedChainId.POLYGON]: MATIC_TOKEN,
