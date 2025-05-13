@@ -46,6 +46,12 @@ const getOogaboogaList: () => Promise<Token[]> = () =>
             : token.address.toLowerCase(),
       })),
     );
+
+const getRoosterList: () => Promise<Token[]> = () =>
+  fetch("https://api.rooster-protocol.xyz/api/tokens")
+    .then((res) => res.json())
+    .then(({ tokens }) => tokens);
+
 //
 // const getShadowList: (chainId: number) => Promise<Token[]> = () =>
 //   fetch(
@@ -167,7 +173,7 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       getters = [getGeckoList(chainId), sonicAdditionalTokens];
       break;
     case SupportedChainId.PLUME:
-      getters = [plumeAdditionalTokens];
+      getters = [plumeAdditionalTokens, getRoosterList()];
       break;
     case SupportedChainId.INK:
     case SupportedChainId.UNICHAIN:
