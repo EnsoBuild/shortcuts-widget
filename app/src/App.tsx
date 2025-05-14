@@ -35,7 +35,7 @@ function App() {
   // Use a single state object instead of multiple state variables
   const [state, setState] = useState<AppState>({});
 
-  // Parse URL params on initial load and location changes
+  // Parse URL params and save to sate on initial load
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tokenInParam = searchParams.get("tokenIn");
@@ -45,10 +45,8 @@ function App() {
     const outProjectParam = searchParams.get("outProject");
     const obligated = searchParams.get("obligated");
 
-    // Create a new state object with URL parameters
     const newState: AppState = {};
 
-    // Set initial state from URL parameters
     if (chainIdParam) newState.chainId = parseInt(chainIdParam);
     if (outChainIdParam) newState.outChainId = parseInt(outChainIdParam);
     if (isAddress(tokenInParam)) newState.tokenIn = tokenInParam as Address;
@@ -64,22 +62,22 @@ function App() {
 
   // Update URL when parameters change
   useEffect(() => {
-    const searchParams = new URLSearchParams();
+    // Get current search params first to preserve any params not managed by this component
+    const searchParams = new URLSearchParams(location.search);
 
+    // Only update params that are in state
     if (state.tokenIn) searchParams.set("tokenIn", state.tokenIn);
 
-    if (state.tokenOut) {
-      state.tokenOut && searchParams.set("tokenOut", state.tokenOut);
-      state.outChainId &&
-        searchParams.set("outChainId", state.outChainId.toString());
-    }
+    if (state.tokenOut) searchParams.set("tokenOut", state.tokenOut);
 
+    if (state.outChainId)
+      searchParams.set("outChainId", state.outChainId.toString());
     if (state.chainId) searchParams.set("chainId", state.chainId.toString());
     if (state.obligateSelection)
       searchParams.set("obligated", state.obligateSelection.toString());
 
     navigate({ search: searchParams.toString() }, { replace: true });
-  }, [state, navigate]);
+  }, [state, navigate, location.search]);
 
   // Handler for state changes coming from the widget
   const handleStateChange = useCallback((newWidgetState: Partial<AppState>) => {

@@ -196,12 +196,6 @@ const SwapWidget = ({
   const tokenOutUsdPrice =
     +(outUsdPrice?.price ?? 0) *
     +normalizeValue(routerData?.amountOut?.toString(), tokenOutInfo?.decimals);
-
-  const urlToCopy = useMemo(() => {
-    const url = new URL(window.location.href);
-    return url.toString();
-  }, []);
-
   const priceImpactValue = (routerData as any)?.priceImpact;
 
   const shouldWarnPriceImpact =
@@ -439,7 +433,7 @@ const SwapWidget = ({
         <Flex w={"100%"}>
           {enableShare && (
             <Box color={"gray.500"}>
-              <ClipboardRoot value={urlToCopy} position={"absolute"}>
+              <ClipboardRoot value={window.location.href} position={"absolute"}>
                 <ClipboardLink textStyle={"xs"} cursor={"pointer"} />
               </ClipboardRoot>
             </Box>

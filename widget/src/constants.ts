@@ -133,7 +133,7 @@ export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.UNICHAIN]: "unichain",
   [SupportedChainId.INK]: "ink",
   [SupportedChainId.SONEIUM]: "soneium",
-  [SupportedChainId.PLUME]: "plume",
+  [SupportedChainId.PLUME]: "plumephoenix",
 };
 
 export const MOCK_IMAGE_URL =
