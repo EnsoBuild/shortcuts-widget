@@ -124,14 +124,6 @@ const plumeAdditionalTokens = // Additional tokens for Plume network
           "https://assets.coingecko.com/coins/images/53623/standard/plume-token.png?1736896935",
       },
       {
-        address: "0x54FD4da2Fa19Cf0f63d8f93A6EA5BEd3F9C042C6",
-        name: "USD Coin",
-        symbol: "USDC",
-        decimals: 6,
-        logoURI:
-          "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
-      },
-      {
         address: "0x78adD880A697070c1e765Ac44D65323a0DcCE913",
         name: "USD Coin.e",
         symbol: "USDC.e",
