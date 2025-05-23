@@ -24,16 +24,16 @@ const ProtocolIcon = ({ logoUri }: { logoUri?: string }) => (
   <Box
     borderRadius={"50%"}
     overflow={"hidden"}
-    width={"24px"}
-    height={"24px"}
-    minWidth={"24px"}
+    width={"28px"}
+    height={"28px"}
+    minWidth={"28px"}
     marginRight={"8px"}
     display={"flex"}
     alignItems={"center"}
     justifyContent={"center"}
     backgroundColor={"gray.50"}
   >
-    {logoUri && <img src={logoUri} alt="" width={"24px"} height={"24px"} />}
+    {logoUri && <img src={logoUri} alt="" width={"28px"} height={"28px"} />}
   </Box>
 );
 
@@ -75,7 +75,7 @@ const ProjectSelector = ({
     >
       <Select.Control>
         <SelectTrigger maxWidth={"100%"} borderRadius={"xl"}>
-          <SelectValueText placeholder="Protocol (opt.)">
+          <SelectValueText placeholder="Protocol (opt.)" height={"28px"}>
             {([protocol]) =>
               protocol ? (
                 <Flex alignItems={"center"}>
@@ -100,7 +100,12 @@ const ProjectSelector = ({
       </Select.Control>
 
       <Select.Positioner>
-        <SelectContent portalled={false} borderWidth={1} borderRadius={"xl"} bg={"bg"}>
+        <SelectContent
+          portalled={false}
+          borderWidth={1}
+          borderRadius={"xl"}
+          bg={"bg"}
+        >
           {projectOptions.items.map((item) => {
             return (
               <SelectItem key={item.slug} item={item}>

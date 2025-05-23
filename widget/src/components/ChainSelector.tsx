@@ -100,7 +100,7 @@ const ChainSelector = ({
     >
       <Select.Control>
         <SelectTrigger borderRadius={"xl"}>
-          <SelectValueText>
+          <SelectValueText height={"28px"}>
             {(items) =>
               items[0] ? (
                 <ChainIndicator chain={items[0]} />
