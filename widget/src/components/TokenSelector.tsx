@@ -280,7 +280,7 @@ const TokenSelector = ({
             placeholder="Select token"
             width={"fit-content"}
             maxWidth={"100%"}
-            height={"28px"}
+            maxHeight={"40px"}
           >
             {(tokens: Token[]) =>
               isLoading ? (
