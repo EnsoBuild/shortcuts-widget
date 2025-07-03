@@ -23,8 +23,7 @@ import React from "react";
 
 const berachainWithIcon = {
   ...berachain,
-  iconUrl:
-    "https://assets.coingecko.com/coins/images/25235/large/BERA.png?1738822008",
+  iconUrl: "https://assets.coingecko.com/coins/images/25235/large/BERA.png",
 };
 const sonicWithIcon = {
   ...sonic,
@@ -34,14 +33,14 @@ const sonicWithIcon = {
 const plumeWithIcon = {
   ...plumeMainnet,
   iconUrl:
-    "https://assets.coingecko.com/coins/images/53623/large/plume-token.png?1736896935",
+    "https://assets.coingecko.com/coins/images/53623/large/plume-token.png",
 };
 
 const soneiumWithIcon = {
   ...soneium,
   name: "Soneium",
   iconUrl:
-    "https://assets.coingecko.com/asset_platforms/images/22200/large/soneium-removebg-preview.png?1737099934",
+    "https://assets.coingecko.com/asset_platforms/images/22200/large/soneium-removebg-preview.png",
 };
 
 const ethereumWithRpc = {
@@ -99,6 +98,26 @@ const hyperevm = {
   },
 };
 
+const katana = {
+  id: 747474,
+  name: "Katana",
+  logoURI:
+    "https://assets.coingecko.com/asset_platforms/images/32239/large/katana.jpg",
+  nativeCurrency: { name: "Katana Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.katana.network", "https://rpc.katanarpc.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Etherscan",
+      url: "https://explorer-katana.t.conduit.xyz/",
+      apiUrl: "https://api.lineascan.build/api",
+    },
+  },
+};
+
 const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "";
 
 const config = getDefaultConfig({
@@ -109,6 +128,7 @@ const config = getDefaultConfig({
     baseWithRpc,
     arbitrum,
     berachainWithIcon,
+    katana,
     sonicWithIcon,
     unichain,
     plumeWithIcon,

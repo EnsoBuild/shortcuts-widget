@@ -55,6 +55,13 @@ const getRoosterList: () => Promise<Token[]> = () =>
     .then((res) => res.json())
     .then(({ tokens }) => tokens);
 
+const getKatanaList: () => Promise<Token[]> = () =>
+  fetch(
+    "https://raw.githubusercontent.com/katana-network/tokenlist/refs/heads/main/tokenlist.json"
+  )
+    .then((res) => res.json())
+    .then(({ tokens }) => tokens);
+
 //
 // const getShadowList: (chainId: number) => Promise<Token[]> = () =>
 //   fetch(
@@ -163,10 +170,15 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
     case SupportedChainId.PLUME:
       getters = [plumeAdditionalTokens, getRoosterList()];
       break;
+
+    case SupportedChainId.KATANA:
+      getters = [getGeckoList(chainId), getKatanaList()];
+      break;
     case SupportedChainId.INK:
     case SupportedChainId.UNICHAIN:
     case SupportedChainId.SONEIUM:
     case SupportedChainId.HYPERLIQUID:
+    case SupportedChainId.KATANA:
       getters = [getGeckoList(chainId)];
       break;
     default:

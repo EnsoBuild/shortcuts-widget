@@ -99,6 +99,7 @@ export enum SupportedChainId {
   SONEIUM = 1868,
   PLUME = 98866,
   HYPERLIQUID = 999,
+  KATANA = 747474,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
@@ -128,6 +129,7 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.SONEIUM]: "soneium",
   [SupportedChainId.PLUME]: "plume",
   [SupportedChainId.HYPERLIQUID]: "hyperevm",
+  [SupportedChainId.KATANA]: "katana",
 };
 
 export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
@@ -148,6 +150,7 @@ export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.SONEIUM]: "soneium",
   [SupportedChainId.PLUME]: "plumephoenix",
   [SupportedChainId.HYPERLIQUID]: "hyperliquid",
+  [SupportedChainId.KATANA]: "katana",
 };
 
 export const MOCK_IMAGE_URL =
@@ -174,6 +177,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.SONEIUM]: "https://soneium.blockscout.com/",
   [SupportedChainId.PLUME]: "https://explorer.plume.org/",
   [SupportedChainId.HYPERLIQUID]: "https://www.hyperscan.com/",
+  [SupportedChainId.KATANA]: "https://explorer-katana.t.conduit.xyz/",
 };
 
 export const NATIVE_ETH_CHAINS = [
@@ -206,6 +210,7 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.SONIC]: SONIC_TOKEN,
   [SupportedChainId.PLUME]: PLUME_TOKEN,
   [SupportedChainId.HYPERLIQUID]: HYPERLIQUID_TOKEN,
+  [SupportedChainId.KATANA]: ETH_TOKEN,
 };
 
 export const SWAP_LIMITS: Record<Address, number> = {
@@ -245,37 +250,41 @@ export const MAINNET_ZAP_INPUT_TOKENS: Address[] = [
   ETH_ADDRESS,
 ];
 
-export const CHAINS_ICON_URL: Record<SupportedChainId, string> = {
-  [SupportedChainId.MAINNET]:
-    "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
-  [SupportedChainId.ARBITRUM_ONE]:
-    "https://assets.coingecko.com/asset_platforms/images/33/large/AO_logomark.png",
-  [SupportedChainId.OPTIMISM]:
-    "https://assets.coingecko.com/asset_platforms/images/34/large/Optimism_logo.png",
-  [SupportedChainId.POLYGON]:
-    "https://assets.coingecko.com/asset_platforms/images/35/large/polygon-pos.png",
-  [SupportedChainId.BSC]:
-    "https://assets.coingecko.com/asset_platforms/images/36/large/binance-smart-chain.png",
-  [SupportedChainId.BASE]:
-    "https://assets.coingecko.com/asset_platforms/images/37/large/base.png",
-  [SupportedChainId.LINEA]:
-    "https://assets.coingecko.com/asset_platforms/images/38/large/linea.png",
-  [SupportedChainId.ZKSYNC]:
-    "https://assets.coingecko.com/asset_platforms/images/39/large/zksync.png",
-  [SupportedChainId.GNOSIS]:
-    "https://assets.coingecko.com/asset_platforms/images/40/large/xdai.png",
-  [SupportedChainId.AVALANCHE]:
-    "https://assets.coingecko.com/asset_platforms/images/41/large/avalanche-2.png",
-  [SupportedChainId.BERACHAIN]:
-    "https://assets.coingecko.com/asset_platforms/images/42/large/berachain.png",
-  [SupportedChainId.SONIC]:
-    "https://assets.coingecko.com/asset_platforms/images/43/large/sonic.png",
-  [SupportedChainId.UNICHAIN]:
-    "https://assets.coingecko.com/asset_platforms/images/22206/large/unichain.png",
-  [SupportedChainId.PLUME]:
-    "https://assets.coingecko.com/coins/images/53623/large/plume-token.png?1736896935",
-  [SupportedChainId.SONEIUM]:
-    "https://assets.coingecko.com/asset_platforms/images/22200/large/soneium-removebg-preview.png?1737099934",
-  [SupportedChainId.INK]:
-    "https://assets.coingecko.com/asset_platforms/images/22194/large/ink.jpg?1737600222",
-};
+// export const CHAINS_ICON_URL: Record<SupportedChainId, string> = {
+//   [SupportedChainId.MAINNET]:
+//     "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
+//   [SupportedChainId.ARBITRUM_ONE]:
+//     "https://assets.coingecko.com/asset_platforms/images/33/large/AO_logomark.png",
+//   [SupportedChainId.OPTIMISM]:
+//     "https://assets.coingecko.com/asset_platforms/images/34/large/Optimism_logo.png",
+//   [SupportedChainId.POLYGON]:
+//     "https://assets.coingecko.com/asset_platforms/images/35/large/polygon-pos.png",
+//   [SupportedChainId.BSC]:
+//     "https://assets.coingecko.com/asset_platforms/images/36/large/binance-smart-chain.png",
+//   [SupportedChainId.BASE]:
+//     "https://assets.coingecko.com/asset_platforms/images/37/large/base.png",
+//   [SupportedChainId.LINEA]:
+//     "https://assets.coingecko.com/asset_platforms/images/38/large/linea.png",
+//   [SupportedChainId.ZKSYNC]:
+//     "https://assets.coingecko.com/asset_platforms/images/39/large/zksync.png",
+//   [SupportedChainId.GNOSIS]:
+//     "https://assets.coingecko.com/asset_platforms/images/40/large/xdai.png",
+//   [SupportedChainId.AVALANCHE]:
+//     "https://assets.coingecko.com/asset_platforms/images/41/large/avalanche-2.png",
+//   [SupportedChainId.BERACHAIN]:
+//     "https://assets.coingecko.com/asset_platforms/images/42/large/berachain.png",
+//   [SupportedChainId.SONIC]:
+//     "https://assets.coingecko.com/asset_platforms/images/43/large/sonic.png",
+//   [SupportedChainId.UNICHAIN]:
+//     "https://assets.coingecko.com/asset_platforms/images/22206/large/unichain.png",
+//   [SupportedChainId.PLUME]:
+//     "https://assets.coingecko.com/coins/images/53623/large/plume-token.png?1736896935",
+//   [SupportedChainId.SONEIUM]:
+//     "https://assets.coingecko.com/asset_platforms/images/22200/large/soneium-removebg-preview.png?1737099934",
+//   [SupportedChainId.INK]:
+//     "https://assets.coingecko.com/asset_platforms/images/22194/large/ink.jpg?1737600222",
+//   [SupportedChainId.HYPERLIQUID]:
+//     "https://assets.coingecko.com/asset_platforms/images/243/large/hyperliquid.png",
+//   [SupportedChainId.KATANA]:
+//     "https://assets.coingecko.com/asset_platforms/images/32239/large/katana.jpg",
+// };
