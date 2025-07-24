@@ -5,6 +5,7 @@ import {
   defaultConfig,
   SystemConfig,
   EnvironmentProvider,
+  chakra,
 } from "@chakra-ui/react";
 import { Address } from "viem";
 import { WagmiContext } from "wagmi";
@@ -33,6 +34,8 @@ type WidgetProps = WidgetComponentProps & {
 };
 
 const varRoot = ":host";
+
+const Root = chakra(root.div);
 
 const Widget = ({
   apiKey,
@@ -123,10 +126,10 @@ const Widget = ({
   }, []);
 
   return (
-    <root.div
+    <Root
       ref={setShadow}
+      borderRadius="xl"
       style={{
-        borderRadius: "0.75rem",
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
       }}
     >
@@ -157,7 +160,7 @@ const Widget = ({
           </CacheProvider>
         </EnvironmentProvider>
       )}
-    </root.div>
+    </Root>
   );
 };
 
