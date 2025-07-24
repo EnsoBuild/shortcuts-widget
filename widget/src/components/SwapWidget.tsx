@@ -476,7 +476,7 @@ const SwapWidget = ({
                   borderRadius={"lg"}
                   colorPalette={"blue"}
                   flex={1}
-                  loading={approve.isLoading}
+                  loading={approve.isPending}
                   onClick={approve.write}
                 >
                   Approve
@@ -491,11 +491,11 @@ const SwapWidget = ({
                 colorPalette={"blue"}
                 flex={1}
                 disabled={swapDisabled}
-                loading={sendTransaction.isLoading || routerLoading}
+                loading={sendTransaction.isPending || routerLoading}
                 onClick={
                   needToAcceptWarning
                     ? showPriceImpactWarning
-                    : sendTransaction.send
+                    : sendTransaction.sendTransaction
                 }
               >
                 {chainId === outChainId ? "Swap" : "Bridge"}

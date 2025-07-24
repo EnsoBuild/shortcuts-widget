@@ -276,14 +276,29 @@ export const usePriorityChainId = (priorityChainId?: SupportedChainId) => {
   return priorityChainId ?? obligatedChainId ?? chainId;
 };
 
-export const useEtherscanUrl = (
-  address: string,
-  type: "/address" | "/tx" = "/tx"
-) => {
-  const chainId = usePriorityChainId();
+export const useChainEtherscanUrl = ({
+  hash,
+  chainId,
+  type = "/tx",
+}: {
+  hash: string;
+  chainId: SupportedChainId;
+  type?: "/address" | "/tx";
+}) => {
   const chainPrefix = CHAINS_ETHERSCAN[chainId];
 
-  if (address) return `${chainPrefix}${type}/${address}`;
+  if (hash) return `${chainPrefix}${type}/${hash}`;
+};
+
+export const useEtherscanUrl = ({
+  hash,
+  type = "/tx",
+}: {
+  hash: string;
+  type?: "/address" | "/tx";
+}) => {
+  const priorityChainId = usePriorityChainId();
+  return useChainEtherscanUrl({ hash, chainId: priorityChainId, type });
 };
 
 export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

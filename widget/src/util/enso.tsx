@@ -15,7 +15,7 @@ import {
   useOutChainId,
   useTokenFromList,
 } from "@/util/common";
-import { useSendEnsoTransaction } from "@/util/wallet";
+import { useExtendedSendTransaction } from "@/util/wallet";
 import {
   ONEINCH_ONLY_TOKENS,
   SupportedChainId,
@@ -24,6 +24,7 @@ import {
   VITALIK_ADDRESS,
 } from "@/constants";
 import { formatNumber, normalizeValue } from ".";
+import { useTxTracker } from "./useTracker";
 
 let ensoClient: EnsoClient | null = null;
 
@@ -314,13 +315,6 @@ export const useBundleData = (
   });
 };
 
-type UseEnsoDataResult = UseQueryResult<
-  Awaited<ReturnType<EnsoClient["getRouterData"]>>,
-  Error
-> & {
-  sendTransaction: ReturnType<typeof useSendEnsoTransaction>;
-};
-
 export const useEnsoData = (
   amountIn: string,
   tokenIn: Address,
@@ -328,7 +322,7 @@ export const useEnsoData = (
   slippage: number,
   referralCode?: string,
   onSuccess?: (hash: string) => void
-): UseEnsoDataResult => {
+) => {
   const { address = VITALIK_ADDRESS } = useAccount();
   const chainId = usePriorityChainId();
   const outChainId = useOutChainId();
@@ -398,11 +392,25 @@ export const useEnsoData = (
 
   const routerData = useEnsoRouterData(routerParams, true);
 
-  const sendTransaction = useSendEnsoTransaction({
+  const { track } = useTxTracker();
+
+  const successCallback = useCallback(
+    (hash) => {
+      track({
+        hash,
+        chainId,
+        crosschain: isCrosschain,
+        message: swapTitle,
+        onConfirmed: () => {},
+      });
+      onSuccess?.(hash);
+    },
+    [swapTitle, chainId],
+  );
+
+  const sendTransaction = useExtendedSendTransaction({
     args: routerData.data?.tx,
-    title: swapTitle,
-    crosschain: isCrosschain,
-    onSuccess,
+    onSuccess: successCallback,
   });
 
   return {

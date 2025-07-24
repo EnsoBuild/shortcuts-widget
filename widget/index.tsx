@@ -15,6 +15,8 @@ import createCache from "@emotion/cache";
 import SwapWidget from "@/components/SwapWidget";
 import { useStore } from "@/store";
 import { setApiKey } from "@/util/enso";
+import { TxTracker } from "@/util/useTracker";
+
 import {
   WidgetComponentProps,
   WidgetState,
@@ -132,6 +134,7 @@ const Widget = ({
         <EnvironmentProvider value={() => shadow.shadowRoot ?? document}>
           <CacheProvider value={cache}>
             <ChakraProvider value={system}>
+              <TxTracker />
               <SwapWidget
                 onSuccess={onSuccess}
                 notificationPlacement={notificationPlacement}
