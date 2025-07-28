@@ -229,7 +229,7 @@ export const ONEINCH_ONLY_TOKENS = [
   "0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3",
 ];
 
-export const PRICE_IMPACT_WARN_THRESHOLD = 100; // basis points
+export const PRICE_IMPACT_WARN_THRESHOLD = 200; // basis points
 export const DEFAULT_SLIPPAGE = 25; // 0.25%
 
 export const MAINNET_ZAP_INPUT_TOKENS: Address[] = [
