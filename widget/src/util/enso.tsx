@@ -137,7 +137,7 @@ const useBridgeBundle = (
   /*
     If outToken is stable it should have priority
     Than if inToken is stable it should have priority
-    Having pririty means use it if it is USDC/USDT or just use one of them
+    Having priority means use it if it is USDC/USDT or just use one of them
     Otherwise use default priority depending on if chain is native eth chain
   */
   const prioritizedBridgeSymbols = useMemo(() => {
