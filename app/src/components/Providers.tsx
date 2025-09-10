@@ -1,4 +1,8 @@
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  connectorsForWallets,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
+import { porto } from "porto/wagmi";
 import {
   base,
   mainnet,
@@ -18,8 +22,14 @@ import {
   plumeMainnet,
 } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
+import { createConfig, http, WagmiProvider } from "wagmi";
 import React from "react";
+import {
+  rainbowWallet,
+  walletConnectWallet,
+  coinbaseWallet,
+} from "@rainbow-me/rainbowkit/wallets";
+import { createClient } from "viem";
 
 const berachainWithIcon = {
   ...berachain,
@@ -120,9 +130,24 @@ const katana = {
 
 const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "";
 
-const config = getDefaultConfig({
-  appName: "Happy Path",
-  projectId,
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: "Recommended",
+      wallets: [rainbowWallet, walletConnectWallet, coinbaseWallet],
+    },
+  ],
+  {
+    appName: "Happy Path",
+    projectId,
+  }
+);
+
+const config = createConfig({
+  client({ chain }) {
+    return createClient({ chain, transport: http() });
+  },
+  connectors: [...connectors, porto()],
   chains: [
     ethereumWithRpc,
     baseWithRpc,
@@ -144,6 +169,7 @@ const config = getDefaultConfig({
     ink,
   ],
 });
+
 const queryClient = new QueryClient();
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
