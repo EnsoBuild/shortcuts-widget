@@ -30,7 +30,7 @@ import { SuccessDetails, Token } from "@/types";
 let ensoClient: EnsoClient | null = null;
 
 type CrosschainParams = RouteParams & {
-  referralCode: string;
+  referralCode?: string;
   destinationChainId?: number;
 };
 
@@ -280,6 +280,8 @@ const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
       params.tokenIn,
       params.tokenOut,
       params.amountIn,
+      params.fee,
+      params.feeReceiver,
     ],
     queryFn: () => ensoClient.getRouterData(params),
     refetchInterval: 30 * 1000,
@@ -323,6 +325,7 @@ export const useEnsoData = (
   tokenOut: Address,
   slippage: number,
   referralCode?: string,
+  fee?: { fee: number; feeReceiver: Address },
   onSuccess?: (hash: string, details?: SuccessDetails) => void
 ) => {
   const { address = VITALIK_ADDRESS } = useAccount();
@@ -339,6 +342,7 @@ export const useEnsoData = (
     spender: address,
     routingStrategy: "router",
     chainId,
+    ...(fee && { fee: fee.fee, feeReceiver: fee.feeReceiver }),
   };
 
   if (
