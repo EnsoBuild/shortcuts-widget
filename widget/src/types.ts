@@ -57,6 +57,10 @@ export type WidgetComponentProps = {
   inProjects?: ProjectFilter;
   onChange?: (newState: WidgetState) => void;
   referralCode?: string;
+  fee?: {
+    fee: number;
+    feeReceiver: Address;
+  };
   outTokens?: {
     include: Address[];
     exclude: Address[];

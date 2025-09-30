@@ -99,6 +99,7 @@ const SwapWidget = ({
   notificationPlacement,
   onSuccess,
   referralCode,
+  fee,
 }: WidgetComponentProps) => {
   const [tokenIn, setTokenIn] = useState<Address>();
   const [valueIn, setValueIn] = useState("");
@@ -210,6 +211,7 @@ const SwapWidget = ({
     tokenOut,
     slippage,
     referralCode,
+    fee,
     onSuccessCallback
   );
 
