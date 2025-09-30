@@ -56,6 +56,7 @@ const Widget = ({
   onSuccess,
   notificationPlacement,
   referralCode,
+  fee,
 }: WidgetProps) => {
   const [shadow, setShadow] = useState<HTMLElement | null>(null);
   const [cache, setCache] = useState<ReturnType<typeof createCache> | null>(
@@ -152,6 +153,7 @@ const Widget = ({
                 inTokens={inTokens}
                 onChange={onChange}
                 referralCode={referralCode}
+                fee={fee}
               />
             </ChakraProvider>
           </CacheProvider>
