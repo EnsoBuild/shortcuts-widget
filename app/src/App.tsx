@@ -12,6 +12,7 @@ import Providers from "@/components/Providers";
 import SwapWidget from "@ensofinance/shortcuts-widget";
 
 import logoUrl from "./logo_black_white.png";
+import { TwitterIcon, DiscordIcon, TelegramIcon, WebsiteIcon } from "@/components/SocialIcons";
 
 import "@rainbow-me/rainbowkit/styles.css";
 // import "./App.css";
@@ -154,6 +155,54 @@ function App() {
         </div>
         <div />
       </div>
+
+      <footer
+        style={{
+          position: "fixed",
+          bottom: 0,
+          width: "100%",
+          height: "50px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "30px",
+          padding: "10px",
+          color: "#000",
+        }}
+      >
+        <a
+          href="https://x.com/EnsoBuild"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <TwitterIcon />
+        </a>
+        <a
+          href="https://discord.gg/cDn8cvT9"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <DiscordIcon />
+        </a>
+        <a
+          href="https://t.me/enso_shortcuts"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <TelegramIcon />
+        </a>
+        <a
+          href="https://www.enso.build/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <WebsiteIcon />
+        </a>
+      </footer>
     </Providers>
   );
 }
