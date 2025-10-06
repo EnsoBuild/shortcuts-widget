@@ -91,6 +91,7 @@ function App() {
   // Widget props
   const widgetProps = useMemo(() => {
     const props: ComponentProps<typeof SwapWidget> = {
+      fontFamily: "'Favorit Mono', monospace;",
       apiKey: EnsoApiKey,
       onChange: handleStateChange,
       indicateRoute: true,

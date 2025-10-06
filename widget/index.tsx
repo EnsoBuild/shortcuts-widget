@@ -26,6 +26,7 @@ import {
 } from "./src/types";
 
 type WidgetProps = WidgetComponentProps & {
+  fontFamily?: string;
   apiKey: string;
   themeConfig?: SystemConfig;
   chainId?: number;
@@ -57,6 +58,7 @@ const Widget = ({
   notificationPlacement,
   referralCode,
   fee,
+  fontFamily
 }: WidgetProps) => {
   const [shadow, setShadow] = useState<HTMLElement | null>(null);
   const [cache, setCache] = useState<ReturnType<typeof createCache> | null>(
@@ -96,6 +98,7 @@ const Widget = ({
         globalCss: {
           [varRoot]: {
             ...defaultConfig.globalCss?.html,
+            fontFamily,
             borderRadius: "xl",
             shadow: "sm",
             border: "none",
