@@ -4,7 +4,7 @@
   "type": "module",
   "homepage": "https://www.enso.build/",
   "repository": {
-    "url": "https://github.com/EnsoFinance/shortcuts-widget",
+    "url": "https://github.com/EnsoBuild/shortcuts-widget",
     "type": "git",
     "directory": "widget"
   },
