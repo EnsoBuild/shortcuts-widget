@@ -35,7 +35,7 @@ npm install @ensofinance/shortcuts-widget
 
 ### API Key
 
-To use the widget, you'll need an Enso API key. Visit [https://enso.finance](https://enso.finance) to get your API key.
+To use the widget, you'll need an Enso API key. Visit [https://developers.enso.build](https://developers.enso.build) to get your API key.
 
 ### Basic Implementation
 
