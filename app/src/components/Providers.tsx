@@ -1,4 +1,4 @@
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
   base,
   mainnet,
@@ -16,64 +16,11 @@ import {
   soneium,
   unichain,
   plumeMainnet,
+  worldchain,
 } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
+import { createConfig, fallback, http, WagmiProvider } from "wagmi";
 import React from "react";
-
-const berachainWithIcon = {
-  ...berachain,
-  iconUrl: "https://assets.coingecko.com/coins/images/25235/large/BERA.png",
-};
-const sonicWithIcon = {
-  ...sonic,
-  iconUrl:
-    "https://assets.coingecko.com/coins/images/38108/large/200x200_Sonic_Logo.png",
-};
-const plumeWithIcon = {
-  ...plumeMainnet,
-  iconUrl:
-    "https://assets.coingecko.com/coins/images/53623/large/plume-token.png",
-};
-
-const soneiumWithIcon = {
-  ...soneium,
-  name: "Soneium",
-  iconUrl:
-    "https://assets.coingecko.com/asset_platforms/images/22200/large/soneium-removebg-preview.png",
-};
-
-const ethereumWithRpc = {
-  ...mainnet,
-  rpcUrls: {
-    default: {
-      http: [
-        "https://mainnet.gateway.tenderly.co",
-        "https://eth-mainnet.public.blastapi.io",
-      ],
-      webSocket: [
-        "wss://mainnet.gateway.tenderly.co",
-        "wss://ethereum-rpc.publicnode.com",
-      ],
-    },
-  },
-};
-
-const baseWithRpc = {
-  ...base,
-  rpcUrls: {
-    default: {
-      http: [
-        "https://base-rpc.publicnode.com",
-        "https://base-mainnet.public.blastapi.io",
-      ],
-      webSocket: [
-        "wss://base-rpc.publicnode.com",
-        "wss://base-mainnet.public.blastapi.io",
-      ],
-    },
-  },
-};
 
 const hyperevm = {
   id: 999,
@@ -118,23 +65,48 @@ const katana = {
   },
 };
 
+const plasma = {
+  id: 9745,
+  name: "Plasma",
+  logoURI:
+    "https://assets.coingecko.com/asset_platforms/images/32256/large/plasma.jpg",
+  nativeCurrency: { name: "Plasma Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://plasma.drpc.org", "https://rpc.plasma.to"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Plasmascan",
+      url: "https://plasmascan.to",
+      apiUrl: "https://api.plasmascan.to/api",
+    },
+  },
+};
+
 const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "";
 
-const config = getDefaultConfig({
-  appName: "Happy Path",
+const { connectors } = getDefaultWallets({
+  appName: "EnsoDrop",
+
   projectId,
+});
+
+const config = createConfig({
+  connectors,
   chains: [
-    ethereumWithRpc,
-    baseWithRpc,
+    mainnet,
+    base,
     arbitrum,
-    berachainWithIcon,
+    berachain,
     katana,
-    sonicWithIcon,
+    sonic,
     unichain,
-    plumeWithIcon,
+    plumeMainnet,
     optimism,
     hyperevm,
-    soneiumWithIcon,
+    soneium,
     bsc,
     zksync,
     avalanche,
@@ -142,7 +114,22 @@ const config = getDefaultConfig({
     polygon,
     linea,
     ink,
+    worldchain,
+    plasma,
   ],
+  transports: {
+    [mainnet.id]: fallback([
+      http("https://mainnet.gateway.tenderly.co"),
+      http("https://eth-mainnet.public.blastapi.io"),
+      http(),
+    ]),
+    [base.id]: fallback([
+      http("https://base-rpc.publicnode.com"),
+      http("https://base-mainnet.public.blastapi.io"),
+      http(),
+    ]),
+  },
+  ssr: false,
 });
 const queryClient = new QueryClient();
 

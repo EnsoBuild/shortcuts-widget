@@ -100,6 +100,8 @@ export enum SupportedChainId {
   PLUME = 98866,
   HYPERLIQUID = 999,
   KATANA = 747474,
+  WORLDCHAIN = 480,
+  PLASMA = 9745,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
@@ -130,6 +132,8 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.PLUME]: "plume",
   [SupportedChainId.HYPERLIQUID]: "hyperevm",
   [SupportedChainId.KATANA]: "katana",
+  [SupportedChainId.WORLDCHAIN]: "world-chain",
+  [SupportedChainId.PLASMA]: "plasma",
 };
 
 export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
@@ -151,6 +155,8 @@ export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.PLUME]: "plumephoenix",
   [SupportedChainId.HYPERLIQUID]: "hyperliquid",
   [SupportedChainId.KATANA]: "katana",
+  [SupportedChainId.WORLDCHAIN]: "worldchain",
+  [SupportedChainId.PLASMA]: "plasma",
 };
 
 export const MOCK_IMAGE_URL =
@@ -167,30 +173,35 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   // [SupportedChainId.BLAST]: "https://blastscan.io",
   // [SupportedChainId.SCROLL]: "https://scrollscan.com",
   [SupportedChainId.LINEA]: "https://lineascan.build",
-  [SupportedChainId.ZKSYNC]: "https://explorer.zksync.io/",
-  [SupportedChainId.GNOSIS]: "https://gnosisscan.io/",
+  [SupportedChainId.ZKSYNC]: "https://explorer.zksync.io",
+  [SupportedChainId.GNOSIS]: "https://gnosisscan.io",
   [SupportedChainId.AVALANCHE]: "https://cchain.explorer.avax.network",
   [SupportedChainId.BERACHAIN]: "https://berascan.com",
   [SupportedChainId.SONIC]: "https://sonicscan.io",
   [SupportedChainId.UNICHAIN]: "https://uniscan.xyz",
   [SupportedChainId.INK]: "https://explorer.inkonchain.com",
-  [SupportedChainId.SONEIUM]: "https://soneium.blockscout.com/",
-  [SupportedChainId.PLUME]: "https://explorer.plume.org/",
-  [SupportedChainId.HYPERLIQUID]: "https://www.hyperscan.com/",
-  [SupportedChainId.KATANA]: "https://explorer-katana.t.conduit.xyz/",
+  [SupportedChainId.SONEIUM]: "https://soneium.blockscout.com",
+  [SupportedChainId.PLUME]: "https://explorer.plume.org",
+  [SupportedChainId.HYPERLIQUID]: "https://www.hyperscan.com",
+  [SupportedChainId.KATANA]: "https://explorer-katana.t.conduit.xyz",
+  [SupportedChainId.WORLDCHAIN]: "https://worldscan.org",
+  [SupportedChainId.PLASMA]: "https://plasmascan.to",
 };
 
-export const NATIVE_ETH_CHAINS = [
-  SupportedChainId.MAINNET,
-  SupportedChainId.ARBITRUM_ONE,
-  SupportedChainId.OPTIMISM,
-  SupportedChainId.BASE,
-  SupportedChainId.LINEA,
-  SupportedChainId.ZKSYNC,
-  SupportedChainId.SONEIUM,
-  SupportedChainId.UNICHAIN,
-  SupportedChainId.INK,
-];
+// export const NATIVE_ETH_CHAINS = [
+//   SupportedChainId.MAINNET,
+//   SupportedChainId.ARBITRUM_ONE,
+//   SupportedChainId.OPTIMISM,
+//   SupportedChainId.BASE,
+//   SupportedChainId.LINEA,
+//   SupportedChainId.ZKSYNC,
+//   SupportedChainId.SONEIUM,
+//   SupportedChainId.UNICHAIN,
+//   SupportedChainId.INK,
+//   SupportedChainId.KATANA,
+//   SupportedChainId.WORLDCHAIN,
+//   SupportedChainId.PLASMA,
+// ];
 
 export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.MAINNET]: ETH_TOKEN,
@@ -211,6 +222,8 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.PLUME]: PLUME_TOKEN,
   [SupportedChainId.HYPERLIQUID]: HYPERLIQUID_TOKEN,
   [SupportedChainId.KATANA]: ETH_TOKEN,
+  [SupportedChainId.WORLDCHAIN]: ETH_TOKEN,
+  [SupportedChainId.PLASMA]: ETH_TOKEN,
 };
 
 export const SWAP_LIMITS: Record<Address, number> = {

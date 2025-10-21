@@ -159,19 +159,19 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
     case SupportedChainId.PLUME:
       getters = [plumeAdditionalTokens, getRoosterList()];
       break;
-
+    // gecko only list
     case SupportedChainId.KATANA:
-      getters = [getGeckoList(chainId), getKatanaList()];
-      break;
     case SupportedChainId.INK:
     case SupportedChainId.UNICHAIN:
     case SupportedChainId.SONEIUM:
     case SupportedChainId.HYPERLIQUID:
     case SupportedChainId.KATANA:
+    case SupportedChainId.PLASMA:
+    case SupportedChainId.WORLDCHAIN:
       getters = [getGeckoList(chainId)];
       break;
     default:
-      // priority for oneInch tokens
+      // default with priority for oneInch tokens
       getters = [getOneInchTokenList(chainId), getGeckoList(chainId)];
   }
 
