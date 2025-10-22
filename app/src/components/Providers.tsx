@@ -1,4 +1,4 @@
-import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import {
   base,
   mainnet,
@@ -19,8 +19,62 @@ import {
   worldchain,
 } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createConfig, fallback, http, WagmiProvider } from "wagmi";
+import { WagmiProvider } from "wagmi";
 import React from "react";
+
+const berachainWithIcon = {
+  ...berachain,
+  iconUrl: "https://assets.coingecko.com/coins/images/25235/large/BERA.png",
+};
+const sonicWithIcon = {
+  ...sonic,
+  iconUrl:
+    "https://assets.coingecko.com/coins/images/38108/large/200x200_Sonic_Logo.png",
+};
+const plumeWithIcon = {
+  ...plumeMainnet,
+  iconUrl:
+    "https://assets.coingecko.com/coins/images/53623/large/plume-token.png",
+};
+
+const soneiumWithIcon = {
+  ...soneium,
+  name: "Soneium",
+  iconUrl:
+    "https://assets.coingecko.com/asset_platforms/images/22200/large/soneium-removebg-preview.png",
+};
+
+const ethereumWithRpc = {
+  ...mainnet,
+  rpcUrls: {
+    default: {
+      http: [
+        "https://mainnet.gateway.tenderly.co",
+        "https://eth-mainnet.public.blastapi.io",
+      ],
+      webSocket: [
+        "wss://mainnet.gateway.tenderly.co",
+        "wss://ethereum-rpc.publicnode.com",
+      ],
+    },
+  },
+};
+
+const baseWithRpc = {
+  ...base,
+  rpcUrls: {
+    default: {
+      http: [
+        "https://base-rpc.publicnode.com",
+        "https://base-mainnet.public.blastapi.io",
+      ],
+      webSocket: [
+        "wss://base-rpc.publicnode.com",
+        "wss://base-mainnet.public.blastapi.io",
+      ],
+    },
+  },
+};
 
 const hyperevm = {
   id: 999,
@@ -65,6 +119,8 @@ const katana = {
   },
 };
 
+const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "";
+
 const plasma = {
   id: 9745,
   name: "Plasma",
@@ -85,28 +141,21 @@ const plasma = {
   },
 };
 
-const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "";
-
-const { connectors } = getDefaultWallets({
-  appName: "EnsoDrop",
-
+const config = getDefaultConfig({
+  appName: "Happy Path",
   projectId,
-});
-
-const config = createConfig({
-  connectors,
   chains: [
-    mainnet,
-    base,
+    ethereumWithRpc,
+    baseWithRpc,
     arbitrum,
-    berachain,
+    berachainWithIcon,
     katana,
-    sonic,
+    sonicWithIcon,
     unichain,
-    plumeMainnet,
+    plumeWithIcon,
     optimism,
     hyperevm,
-    soneium,
+    soneiumWithIcon,
     bsc,
     zksync,
     avalanche,
@@ -114,22 +163,9 @@ const config = createConfig({
     polygon,
     linea,
     ink,
-    worldchain,
     plasma,
+    worldchain,
   ],
-  transports: {
-    [mainnet.id]: fallback([
-      http("https://mainnet.gateway.tenderly.co"),
-      http("https://eth-mainnet.public.blastapi.io"),
-      http(),
-    ]),
-    [base.id]: fallback([
-      http("https://base-rpc.publicnode.com"),
-      http("https://base-mainnet.public.blastapi.io"),
-      http(),
-    ]),
-  },
-  ssr: false,
 });
 const queryClient = new QueryClient();
 
