@@ -108,6 +108,19 @@ const sonicAdditionalTokens = // TODO: remove after it comes in list for sonic
     ])
   );
 
+const plasmaTokens = new Promise<Token[]>((resolve) =>
+  resolve([
+    {
+      address: "0x4809010926aec940b550D34a46A52739f996D75D",
+      name: "Wrapped Savings rUSD",
+      symbol: "wsrUSD",
+      decimals: 18,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/66163/large/wsrUSD.png",
+    },
+  ])
+);
+
 const plumeAdditionalTokens = // Additional tokens for Plume network
   new Promise<Token[]>((resolve) =>
     resolve([
@@ -155,6 +168,9 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       break;
     case SupportedChainId.SONIC:
       getters = [getGeckoList(chainId), sonicAdditionalTokens];
+
+    case SupportedChainId.PLASMA:
+      getters = [plasmaTokens, getGeckoList(chainId)];
       break;
     case SupportedChainId.PLUME:
       getters = [plumeAdditionalTokens, getRoosterList()];
@@ -165,8 +181,6 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
     case SupportedChainId.UNICHAIN:
     case SupportedChainId.SONEIUM:
     case SupportedChainId.HYPERLIQUID:
-    case SupportedChainId.KATANA:
-    case SupportedChainId.PLASMA:
     case SupportedChainId.WORLDCHAIN:
       getters = [getGeckoList(chainId)];
       break;
