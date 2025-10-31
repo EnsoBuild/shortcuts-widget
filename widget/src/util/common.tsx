@@ -118,6 +118,14 @@ const plasmaTokens = new Promise<Token[]>((resolve) =>
       logoURI:
         "https://assets.coingecko.com/coins/images/66163/large/wsrUSD.png",
     },
+    {
+      address: "0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a",
+      name: "AUSD",
+      symbol: "AUSD",
+      decimals: 6,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/39284/large/Circle_Agora_White_on_Olive_1080px.png",
+    },
   ])
 );
 
