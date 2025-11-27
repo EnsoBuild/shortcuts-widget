@@ -79,7 +79,7 @@ const HYPERLIQUID_TOKEN: Token = {
 };
 const MONAD_TOKEN: Token = {
   address: ETH_ADDRESS,
-  name: "Vision",
+  name: "Monad",
   symbol: "MON",
   decimals: 18,
   logoURI:
