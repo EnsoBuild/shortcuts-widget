@@ -77,6 +77,14 @@ const HYPERLIQUID_TOKEN: Token = {
   logoURI:
     "https://assets.coingecko.com/asset_platforms/images/243/large/hyperliquid.png",
 };
+const MONAD_TOKEN: Token = {
+  address: ETH_ADDRESS,
+  name: "Monad",
+  symbol: "MON",
+  decimals: 18,
+  logoURI:
+    "https://assets.coingecko.com/asset_platforms/images/32276/large/monad.png",
+};
 
 export enum SupportedChainId {
   MAINNET = 1,
@@ -102,6 +110,7 @@ export enum SupportedChainId {
   KATANA = 747474,
   WORLDCHAIN = 480,
   PLASMA = 9745,
+  MONAD = 143,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
@@ -134,6 +143,7 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.KATANA]: "katana",
   [SupportedChainId.WORLDCHAIN]: "world-chain",
   [SupportedChainId.PLASMA]: "plasma",
+  [SupportedChainId.MONAD]: "monad",
 };
 
 export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
@@ -157,6 +167,7 @@ export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.KATANA]: "katana",
   [SupportedChainId.WORLDCHAIN]: "worldchain",
   [SupportedChainId.PLASMA]: "plasma",
+  [SupportedChainId.MONAD]: "monad",
 };
 
 export const MOCK_IMAGE_URL =
@@ -186,6 +197,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.KATANA]: "https://explorer-katana.t.conduit.xyz",
   [SupportedChainId.WORLDCHAIN]: "https://worldscan.org",
   [SupportedChainId.PLASMA]: "https://plasmascan.to",
+  [SupportedChainId.MONAD]: "https://monadscan.com",
 };
 
 // export const NATIVE_ETH_CHAINS = [
@@ -224,6 +236,7 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.KATANA]: ETH_TOKEN,
   [SupportedChainId.WORLDCHAIN]: ETH_TOKEN,
   [SupportedChainId.PLASMA]: ETH_TOKEN,
+  [SupportedChainId.MONAD]: MONAD_TOKEN,
 };
 
 export const SWAP_LIMITS: Record<Address, number> = {

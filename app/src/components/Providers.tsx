@@ -141,6 +141,24 @@ const plasma = {
   },
 };
 
+const monad = {
+  id: 143,
+  name: "Monad",
+  nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.monad.xyz"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Monadscan",
+      url: "https://monadscan.com",
+      apiUrl: "https://monadscan.com/api",
+    },
+  },
+};
+
 const config = getDefaultConfig({
   appName: "Happy Path",
   projectId,
@@ -163,6 +181,7 @@ const config = getDefaultConfig({
     polygon,
     linea,
     ink,
+    monad,
     plasma,
     worldchain,
   ],
