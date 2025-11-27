@@ -167,6 +167,59 @@ const plumeAdditionalTokens = // Additional tokens for Plume network
     ])
   );
 
+const monadTokens = new Promise<Token[]>((resolve) =>
+  resolve([
+    {
+      address: "0x3bd359c1119da7da1d913d1c4d2b7c461115433a",
+      name: "Wrapped Monad",
+      symbol: "WMON",
+      decimals: 18,
+      logoURI:
+        "https://assets.coingecko.com/asset_platforms/images/32276/large/monad.png",
+    },
+    {
+      address: "0x754704bc059f8c67012fed69bc8a327a5aafb603",
+      name: "USD Coin",
+      symbol: "USDC",
+      decimals: 6,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+    },
+    {
+      address: "0x00000000efe302beaa2b3e6e1b18d08d69a9012a",
+      name: "AUSD",
+      symbol: "AUSD",
+      decimals: 6,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/39284/large/Circle_Agora_White_on_Olive_1080px.png",
+    },
+    {
+      address: "0xe7cd86e13ac4309349f30b3435a9d337750fc82d",
+      name: "Tether USD",
+      symbol: "USDT",
+      decimals: 6,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/325/large/Tether.png",
+    },
+    {
+      address: "0xee8c0e9f1bffb4eb878d8f15f368a02a35481242",
+      name: "Wrapped Ether",
+      symbol: "WETH",
+      decimals: 18,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/2518/large/weth.png",
+    },
+    {
+      address: "0x0555e30da8f98308edb960aa94c0db47230d2b9c",
+      name: "Wrapped Bitcoin",
+      symbol: "WBTC",
+      decimals: 8,
+      logoURI:
+        "https://assets.coingecko.com/coins/images/7598/large/wrapped_bitcoin_wbtc.png",
+    },
+  ])
+);
+
 const getCurrentChainTokens = (chainId: SupportedChainId) => {
   let getters: Promise<Token[] | undefined>[] = [];
 
@@ -182,6 +235,9 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       break;
     case SupportedChainId.PLUME:
       getters = [plumeAdditionalTokens, getRoosterList()];
+      break;
+    case SupportedChainId.MONAD:
+      getters = [monadTokens, getGeckoList(chainId)];
       break;
     // gecko only list
     case SupportedChainId.KATANA:
