@@ -33,6 +33,13 @@ export const setApiKey = (apiKey: string) => {
     baseURL: "https://api.enso.finance/api/v1",
     apiKey,
   });
+
+  // Add custom header to all requests
+  // @ts-expect-error accessing private axios client
+  ensoClient.client.interceptors.request.use((config) => {
+    config.headers["x-enso-widget"] = "shortcuts";
+    return config;
+  });
 };
 
 export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
