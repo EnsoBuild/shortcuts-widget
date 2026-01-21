@@ -77,6 +77,7 @@ const getOneInchTokenList = (chainId: number) =>
 const getChainSymbolSortPriority = (chainId: SupportedChainId) => {
   const defaultPriority = {
     [CHAINS_NATIVE_TOKENS[chainId].symbol]: 5,
+    ENSO: 5,
     USDC: 4,
     DAI: 4,
     USDT: 4,
@@ -198,16 +199,14 @@ const monadTokens = new Promise<Token[]>((resolve) =>
       name: "Tether USD",
       symbol: "USDT",
       decimals: 6,
-      logoURI:
-        "https://assets.coingecko.com/coins/images/325/large/Tether.png",
+      logoURI: "https://assets.coingecko.com/coins/images/325/large/Tether.png",
     },
     {
       address: "0xee8c0e9f1bffb4eb878d8f15f368a02a35481242",
       name: "Wrapped Ether",
       symbol: "WETH",
       decimals: 18,
-      logoURI:
-        "https://assets.coingecko.com/coins/images/2518/large/weth.png",
+      logoURI: "https://assets.coingecko.com/coins/images/2518/large/weth.png",
     },
     {
       address: "0x0555e30da8f98308edb960aa94c0db47230d2b9c",

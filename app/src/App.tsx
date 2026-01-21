@@ -12,7 +12,12 @@ import Providers from "@/components/Providers";
 import SwapWidget from "@ensofinance/shortcuts-widget";
 
 import logoUrl from "./logo_black_white.png";
-import { TwitterIcon, DiscordIcon, TelegramIcon, WebsiteIcon } from "@/components/SocialIcons";
+import {
+  TwitterIcon,
+  DiscordIcon,
+  TelegramIcon,
+  WebsiteIcon,
+} from "@/components/SocialIcons";
 
 import "@rainbow-me/rainbowkit/styles.css";
 // import "./App.css";
