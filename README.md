@@ -148,4 +148,4 @@ For any questions or support, please contact the Enso Finance team:
 
 - [Telegram](https://t.me/Enso_shortcuts)
 - [Twitter](https://twitter.com/EnsoBuild)
-- [Website](https://enso.finance)
+- [Website](https://enso.build)
