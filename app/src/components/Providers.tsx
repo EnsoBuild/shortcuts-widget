@@ -76,6 +76,23 @@ const baseWithRpc = {
   },
 };
 
+const polygonWithRpc = {
+  ...polygon,
+  rpcUrls: {
+    default: {
+      http: [
+        "https://polygon-bor-rpc.publicnode.com",
+        "https://polygon-mainnet.public.blastapi.io",
+        "https://polygon.drpc.org",
+      ],
+      webSocket: [
+        "wss://polygon-bor-rpc.publicnode.com",
+        "wss://polygon-mainnet.public.blastapi.io",
+      ],
+    },
+  },
+};
+
 const hyperevm = {
   id: 999,
   name: "Hyperevm",
@@ -178,7 +195,7 @@ const config = getDefaultConfig({
     zksync,
     avalanche,
     gnosis,
-    polygon,
+    polygonWithRpc,
     linea,
     ink,
     monad,
