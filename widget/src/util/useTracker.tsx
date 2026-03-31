@@ -5,11 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { toaster } from "@/components/ui/toaster";
 import { useChainEtherscanUrl } from "./common";
 import { SupportedChainId } from "@/constants";
+import { checkBridgeStatus } from "./enso";
 
 type TrackParams = {
   hash: `0x${string}` | undefined;
   chainId: SupportedChainId;
-  crosschain: boolean;
+  bridgeProtocol?: string;
   message: string;
   onConfirmed: (
     receipt: ReturnType<typeof useWaitForTransactionReceipt>["data"]
@@ -50,73 +51,95 @@ export const useTxTracker = () => {
   return { track };
 };
 
-enum LayerZeroStatus {
-  Pending = "PENDING",
-  Success = "SUCCEEDED",
-  Failed = "FAILED",
-  Inflight = "INFLIGHT",
-  Confirming = "CONFIRMING",
-  Delivered = "DELIVERED",
-}
+type BridgeStatus = "pending" | "inflight" | "delivered" | "failed" | "unknown";
 
-const useLayerZeroUrl = (hash?: `0x${string}`, reset?: () => void) => {
+const BRIDGE_EXPLORERS: Record<string, (hash: string) => string> = {
+  layerzero: (hash) => `https://layerzeroscan.com/tx/${hash}`,
+  stargate: (hash) => `https://layerzeroscan.com/tx/${hash}`,
+};
+
+const getBridgeExplorerUrl = (
+  bridgeProtocol: string,
+  hash: string
+): string | undefined => BRIDGE_EXPLORERS[bridgeProtocol]?.(hash);
+
+const useEnsoBridgeStatus = (
+  hash: `0x${string}` | undefined,
+  chainId: SupportedChainId,
+  bridgeProtocol: string,
+  reset?: () => void
+) => {
   const [loadingToastId, setLoadingToastId] = useState<string>();
+  const chainExplorerLink = useChainEtherscanUrl({ hash, chainId });
+  const bridgeExplorerLink = hash
+    ? getBridgeExplorerUrl(bridgeProtocol, hash)
+    : undefined;
+  const link = bridgeExplorerLink ?? chainExplorerLink;
+
   const { data } = useQuery({
-    queryKey: ["layerZeroUrl", hash || "none", !!reset],
+    queryKey: ["ensoBridgeStatus", bridgeProtocol, hash || "none", !!reset],
     queryFn: async () => {
       if (!hash) return null;
-      return fetch(`https://scan.layerzero-api.com/v1/messages/tx/${hash}`)
-        .then((res) => res.json())
-        .then((res) => res.data[0]);
+      try {
+        return await checkBridgeStatus(bridgeProtocol, chainId, hash);
+      } catch {
+        return null;
+      }
     },
-    refetchInterval: 2000,
+    refetchInterval: 10_000,
     enabled: !!(reset && hash),
   });
+
+  const action = link
+    ? {
+        label: "View on Explorer",
+        onClick: () => window.open(link, "_blank"),
+      }
+    : undefined;
 
   useEffect(() => {
     if (!hash) return;
 
-    const action = {
-      label: "View on Explorer",
-      onClick: () =>
-        window.open(`https://layerzeroscan.com/tx/${hash}`, "_blank"),
-    };
+    const status = data?.status;
 
     if (!loadingToastId) {
       setLoadingToastId(hash);
       toaster.create({
         id: hash,
-        title: "Pending (0/4)",
-        description: "Waiting for source transaction completion",
+        title: "Bridging (1/3)",
+        description: "Waiting for source transaction confirmation",
         type: "loading",
         action,
       });
-    } else if (
-      data?.source?.status &&
-      data.source.status !== LayerZeroStatus.Success
-    ) {
-      toaster.update(loadingToastId, {
-        title: "Pending (1/4)",
-        description: "Waiting for funds to be sent on destination",
-      });
-    } else if (data?.status?.name === LayerZeroStatus.Delivered) {
+    } else if (status === "delivered") {
       reset?.();
       toaster.update(loadingToastId, {
-        title: "Success (4/4) ",
+        title: "Bridge Complete",
         description: "Bridging is complete",
         type: "success",
         action,
       });
       setLoadingToastId(undefined);
-    } else if (data?.status?.name === LayerZeroStatus.Confirming) {
+    } else if (status === "failed") {
+      reset?.();
       toaster.update(loadingToastId, {
-        title: "Pending (3/4)",
-        description: "Waiting for destination execution",
+        title: "Bridge Failed",
+        description: "Bridge transaction failed",
+        type: "error",
+        action,
       });
-    } else if (data?.status?.name === LayerZeroStatus.Inflight) {
+      setLoadingToastId(undefined);
+    } else if (status === "inflight") {
       toaster.update(loadingToastId, {
-        title: "Pending (2/4)",
-        description: "Waiting for funds to be delivered on destination",
+        title: "Bridging (2/3)",
+        description: "Funds in transit to destination chain",
+        action,
+      });
+    } else if (status === "pending" || status === "unknown") {
+      toaster.update(loadingToastId, {
+        title: "Bridging (1/3)",
+        description: "Transaction confirmed, awaiting bridge pickup",
+        action,
       });
     }
   }, [data, hash]);
@@ -197,7 +220,7 @@ const SingleChainTracker = ({
   chainId,
   message = "Transaction confirmed",
   onConfirmed,
-}: Omit<TrackParams, "crosschain">) => {
+}: Omit<TrackParams, "bridgeProtocol">) => {
   const { removeTx } = useTrackingStore();
   const receipt = useWaitForTransactionReceipt({
     hash,
@@ -220,8 +243,9 @@ const SingleChainTracker = ({
 const CrosschainTracker = ({
   hash,
   chainId,
+  bridgeProtocol,
   onConfirmed,
-}: Omit<TrackParams, "crosschain" | "message">) => {
+}: Omit<TrackParams, "message">) => {
   const { removeTx } = useTrackingStore();
   const receipt = useWaitForTransactionReceipt({
     hash,
@@ -236,13 +260,18 @@ const CrosschainTracker = ({
     }
   }, [receipt.data, onConfirmed]);
 
-  useLayerZeroUrl(receipt.data ? hash : undefined, reset);
+  useEnsoBridgeStatus(
+    receipt.data ? hash : undefined,
+    chainId,
+    bridgeProtocol,
+    reset
+  );
 
   return null;
 };
 
 const Tracker = (props: TrackParams) => {
-  if (props.crosschain) {
+  if (props.bridgeProtocol) {
     return <CrosschainTracker {...props} />;
   }
   return <SingleChainTracker {...props} />;

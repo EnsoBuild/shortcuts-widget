@@ -121,7 +121,7 @@ export const TokenIndicator = ({
           <Box fontSize="xs" fontWeight="medium" whiteSpace="nowrap">
             APY{" "}
             <Text as="span" fontWeight="bold">
-              {token.apy.toFixed(2)}%
+              {Number(token.apy).toFixed(2)}%
             </Text>
           </Box>
         )}

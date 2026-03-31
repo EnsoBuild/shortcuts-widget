@@ -45,9 +45,10 @@ const TokenBadge = ({
   );
 };
 
-type RouteSegment = RouteData["route"][0] & {
+type RouteSegment = Omit<RouteData["route"][0], "internalRoutes"> & {
   chainId?: number;
   destinationChainId?: number;
+  internalRoutes?: RouteSegment[][];
 };
 
 const RouteSegment = ({ step }: { step: RouteSegment }) => (

@@ -9,8 +9,8 @@ export type Token = {
   logoURI: string;
   underlyingTokens?: Token[];
   type?: string;
-  apy?: number;
-  tvl?: number;
+  apy?: string | number;
+  tvl?: string | number;
 };
 
 export type SuccessDetails = {
