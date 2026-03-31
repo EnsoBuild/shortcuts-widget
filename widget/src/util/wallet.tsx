@@ -185,7 +185,7 @@ export const useApproveIfNecessary = (
       track({
         hash,
         chainId,
-        crosschain: false,
+        bridgeProtocol: undefined,
         message: approveData.title,
         onConfirmed: () => {},
       });

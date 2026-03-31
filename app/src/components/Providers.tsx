@@ -112,9 +112,17 @@ const katana = {
   },
   blockExplorers: {
     default: {
-      name: "Etherscan",
-      url: "https://explorer-katana.t.conduit.xyz/",
-      apiUrl: "https://api.lineascan.build/api",
+      name: "Katanascan",
+      url: "https://katanascan.io",
+    },
+  },
+};
+
+const polygonWithRpc = {
+  ...polygon,
+  rpcUrls: {
+    default: {
+      http: ["https://1rpc.io/matic"],
     },
   },
 };
@@ -178,7 +186,7 @@ const config = getDefaultConfig({
     zksync,
     avalanche,
     gnosis,
-    polygon,
+    polygonWithRpc,
     linea,
     ink,
     monad,
