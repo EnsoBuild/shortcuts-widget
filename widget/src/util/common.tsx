@@ -245,6 +245,10 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
     case SupportedChainId.SONEIUM:
     case SupportedChainId.HYPERLIQUID:
     case SupportedChainId.WORLDCHAIN:
+    case SupportedChainId.SEI:
+    case SupportedChainId.TEMPO:
+    case SupportedChainId.MEGAETH:
+    case SupportedChainId.ETHERLINK:
       getters = [getGeckoList(chainId)];
       break;
     default:

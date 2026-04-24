@@ -32,6 +32,7 @@ type AppState = {
   outChainId?: number;
   outProject?: string;
   obligateSelection?: boolean;
+  baseUrl?: string;
 };
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
     const outChainIdParam = searchParams.get("outChainId");
     const outProjectParam = searchParams.get("outProject");
     const obligated = searchParams.get("obligated");
+    const baseUrlParam = searchParams.get("baseUrl");
 
     const newState: AppState = {};
 
@@ -59,6 +61,7 @@ function App() {
     if (isAddress(tokenOutParam)) newState.tokenOut = tokenOutParam as Address;
     if (outProjectParam) newState.outProject = outProjectParam;
     if (obligated) newState.obligateSelection = obligated === "true";
+    if (baseUrlParam) newState.baseUrl = baseUrlParam;
 
     // Only update state if we have actual values
     if (Object.keys(newState).length > 0) {
@@ -110,6 +113,7 @@ function App() {
     if (state.outProject) props.outProject = state.outProject;
     if (state.obligateSelection)
       props.obligateSelection = state.obligateSelection;
+    if (state.baseUrl) props.baseUrl = state.baseUrl;
 
     return props;
   }, [state, handleStateChange]);

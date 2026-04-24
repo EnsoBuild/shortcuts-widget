@@ -14,7 +14,7 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import SwapWidget from "@/components/SwapWidget";
 import { useStore } from "@/store";
-import { setApiKey } from "@/util/enso";
+import { initEnsoClient } from "@/util/enso";
 import { TxTracker } from "@/util/useTracker";
 
 import {
@@ -28,6 +28,7 @@ import {
 type WidgetProps = WidgetComponentProps & {
   fontFamily?: string;
   apiKey: string;
+  baseUrl?: string;
   themeConfig?: SystemConfig;
   chainId?: number;
   outChainId?: number;
@@ -38,6 +39,7 @@ const varRoot = ":host";
 
 const Widget = ({
   apiKey,
+  baseUrl,
   tokenOut,
   tokenIn,
   chainId,
@@ -121,16 +123,17 @@ const Widget = ({
     }
   }, [outChainId, setTokenOutChainId]);
 
-  // initialize client with key before it is used
   useEffect(() => {
     posthog.init("phc_w7nnXuFCFpuhrXLAAHrOrlr7Z0AAFHE79JybZ4bUabk", {
       api_host: "https://eu.i.posthog.com",
-      person_profiles: "always", // or 'always' to create profiles for anonymous users as well
+      person_profiles: "always",
     });
-
-    if (apiKey) setApiKey(apiKey);
-    else alert("Provide Enso API key to the widget");
   }, []);
+
+  useEffect(() => {
+    if (apiKey) initEnsoClient(apiKey, baseUrl);
+    else alert("Provide Enso API key to the widget");
+  }, [apiKey, baseUrl]);
 
   return (
     <root.div ref={setShadow}>

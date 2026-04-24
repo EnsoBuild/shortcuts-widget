@@ -546,7 +546,7 @@ const SwapWidget = ({
             </Flex>
             {showRoute && (
               <RouteIndication
-                route={routerData?.route}
+                route={routerData?.route as any}
                 loading={routerLoading}
               />
             )}
@@ -570,14 +570,6 @@ const SwapWidget = ({
                 color={"fg.muted"}
               >
                 Enso
-              </Link>{" "}
-              and{" "}
-              <Link
-                target={"_blank"}
-                href={"https://stargate.finance/"}
-                color={"fg.muted"}
-              >
-                Stargate
               </Link>
             </Text>
           </Center>

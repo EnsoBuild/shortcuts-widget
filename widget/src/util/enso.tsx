@@ -1,8 +1,13 @@
 import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
-import { EnsoClient, type RouteParams } from "@ensofinance/sdk";
-import { type Address, isAddress } from "viem";
+import {
+  EnsoClient,
+  type RouteParams,
+  type RouteData,
+  type BridgeStatusData,
+} from "@ensofinance/sdk";
+import { type Address, isAddress, isAddressEqual } from "viem";
 import {
   usePriorityChainId,
   useOutChainId,
@@ -10,6 +15,7 @@ import {
 } from "@/util/common";
 import { useExtendedSendTransaction } from "@/util/wallet";
 import {
+  ETH_ADDRESS,
   ONEINCH_ONLY_TOKENS,
   SupportedChainId,
   VITALIK_ADDRESS,
@@ -25,13 +31,29 @@ type CrosschainParams = RouteParams & {
   destinationChainId?: number;
 };
 
-export const setApiKey = (apiKey: string) => {
+const BRIDGE_STATUS_PROTOCOL: Record<string, string> = {
+  stargate: "layerzero",
+};
+
+const getBridgeProtocol = (route?: RouteData["route"]): string | undefined => {
+  const protocol = route?.find((hop) => hop.action === "bridge")?.protocol;
+  return protocol ? (BRIDGE_STATUS_PROTOCOL[protocol] ?? protocol) : undefined;
+};
+
+export const checkBridgeStatus = (
+  bridgeProtocol: string,
+  chainId: number,
+  txHash: string
+): Promise<BridgeStatusData> =>
+  ensoClient.getBridgeStatus({ bridgeProtocol, chainId, txHash });
+
+export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
   ensoClient = new EnsoClient({
     // baseURL: "http://localhost:3000/api/v1",
     baseURL: "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1",
     // baseURL: "https://shortcuts-backend-dynamic-dev.herokuapp.com/api/v1",
     // baseURL: "https://api.enso.build/api/v1",
-    apiKey : "18a49d71-3d8c-4346-87a5-1b856cb3e1dc",
+    apiKey: "18a49d71-3d8c-4346-87a5-1b856cb3e1dc",
   });
 
   // Add custom header to all requests
@@ -45,6 +67,8 @@ export const setApiKey = (apiKey: string) => {
 export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
   const { address } = useAccount();
   const chainId = usePriorityChainId();
+  const isNative =
+    isAddress(tokenAddress) && isAddressEqual(tokenAddress, ETH_ADDRESS);
 
   return useQuery({
     queryKey: ["enso-approval", tokenAddress, chainId, address, amount],
@@ -55,7 +79,8 @@ export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
         chainId,
         amount,
       }),
-    enabled: +amount > 0 && isAddress(address) && isAddress(tokenAddress),
+    enabled:
+      !isNative && +amount > 0 && isAddress(address) && isAddress(tokenAddress),
   });
 };
 
@@ -72,15 +97,15 @@ const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
       params.fee,
       params.feeReceiver,
     ],
-    queryFn: () => ensoClient.getRouterData(params),
+    queryFn: () => ensoClient.getRouteData(params),
     refetchInterval: 30 * 1000,
     enabled:
       enabled &&
-      +params.amountIn > 0 &&
+      +params.amountIn[0] > 0 &&
       isAddress(params.fromAddress) &&
-      isAddress(params.tokenIn) &&
-      isAddress(params.tokenOut) &&
-      (params.tokenIn !== params.tokenOut ||
+      isAddress(params.tokenIn[0]) &&
+      isAddress(params.tokenOut[0]) &&
+      (params.tokenIn[0] !== params.tokenOut[0] ||
         (params.destinationChainId &&
           params.chainId !== params.destinationChainId)),
     retry: 2,
@@ -100,16 +125,16 @@ export const useEnsoData = (
   const outChainId = useOutChainId();
   const routerParams: CrosschainParams = {
     referralCode,
-    amountIn,
-    tokenIn,
-    tokenOut,
+    amountIn: [amountIn],
+    tokenIn: [tokenIn],
+    tokenOut: [tokenOut],
     slippage,
     fromAddress: address,
     receiver: address,
     spender: address,
     routingStrategy: "router",
     chainId,
-    ...(fee && { fee: fee.fee, feeReceiver: fee.feeReceiver }),
+    ...(fee && { fee: [fee.fee], feeReceiver: fee.feeReceiver }),
   };
 
   if (
@@ -129,18 +154,18 @@ export const useEnsoData = (
   const {
     tokens: [tokenToData],
   } = useEnsoToken({
-    address: routerParams.tokenOut,
-    enabled: isAddress(routerParams.tokenOut),
+    address: tokenOut,
+    enabled: isAddress(tokenOut),
   });
   const {
     tokens: [tokenFromData],
   } = useEnsoToken({
-    address: routerParams.tokenIn,
-    enabled: isAddress(routerParams.tokenIn),
+    address: tokenIn,
+    enabled: isAddress(tokenIn),
   });
 
   const swapTitle = `Purchase ${formatNumber(
-    normalizeValue(routerParams.amountIn, tokenFromData?.decimals)
+    normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
   const routerData = useEnsoRouterData(routerParams, true);
@@ -152,7 +177,7 @@ export const useEnsoData = (
       track({
         hash,
         chainId,
-        crosschain: isCrosschain,
+        bridgeProtocol: getBridgeProtocol(routerData.data?.route),
         message: swapTitle,
         onConfirmed: () => {},
       });
