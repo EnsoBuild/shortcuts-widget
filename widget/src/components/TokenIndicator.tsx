@@ -1,9 +1,5 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
-import {
-  MOCK_IMAGE_URL,
-  SupportedChainId,
-  STARGATE_CHAIN_NAMES,
-} from "@/constants";
+import { getChainIconUrl, MOCK_IMAGE_URL, SupportedChainId } from "@/constants";
 import { formatCompactUsd } from "@/util";
 import { Token } from "@/types";
 
@@ -52,7 +48,7 @@ export const TokenIcon = ({
         zIndex="1"
       >
         <img
-          src={`https://icons-ckg.pages.dev/stargate-light/networks/${STARGATE_CHAIN_NAMES[chainId]}.svg`}
+          src={getChainIconUrl(chainId)}
           alt={`Chain ${chainId}`}
           width="100%"
           height="100%"

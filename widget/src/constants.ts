@@ -100,14 +100,6 @@ const XTZ_TOKEN: Token = {
   decimals: 18,
   logoURI: "https://assets.coingecko.com/coins/images/976/large/Tezos-logo.png",
 };
-const USD_TOKEN: Token = {
-  address: ETH_ADDRESS,
-  name: "US Dollar",
-  symbol: "USD",
-  decimals: 6,
-  logoURI:
-    "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
-};
 const XPL_TOKEN: Token = {
   address: ETH_ADDRESS,
   name: "Plasma",
@@ -262,7 +254,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
 //   SupportedChainId.PLASMA,
 // ];
 
-export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
+export const CHAINS_NATIVE_TOKENS: Partial<Record<SupportedChainId, Token>> = {
   [SupportedChainId.MAINNET]: ETH_TOKEN,
   [SupportedChainId.ARBITRUM_ONE]: ETH_TOKEN,
   [SupportedChainId.OPTIMISM]: ETH_TOKEN,
@@ -285,10 +277,21 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.PLASMA]: XPL_TOKEN,
   [SupportedChainId.MONAD]: MONAD_TOKEN,
   [SupportedChainId.SEI]: SEI_TOKEN,
-  [SupportedChainId.TEMPO]: USD_TOKEN,
   [SupportedChainId.MEGAETH]: ETH_TOKEN,
   [SupportedChainId.ETHERLINK]: XTZ_TOKEN,
 };
+
+export const CHAINS_WITHOUT_NATIVE: Set<number> = new Set<number>([
+  SupportedChainId.TEMPO,
+]);
+
+export const CHAIN_ICON_OVERRIDES: Partial<Record<SupportedChainId, string>> = {
+  [SupportedChainId.TEMPO]: "https://icons.llamao.fi/icons/chains/rsz_tempo",
+};
+
+export const getChainIconUrl = (chainId: SupportedChainId) =>
+  CHAIN_ICON_OVERRIDES[chainId] ??
+  `https://icons-ckg.pages.dev/stargate-light/networks/${STARGATE_CHAIN_NAMES[chainId]}.svg`;
 
 export const SWAP_LIMITS: Record<Address, number> = {
   ["0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b"]: 100000, // WABTC limit

@@ -167,7 +167,7 @@ const megaethWithIcon = {
 
 const tempoWithIcon = {
   ...tempo,
-  iconUrl: "https://icons-ckg.pages.dev/stargate-light/networks/tempo.svg",
+  iconUrl: "https://icons.llamao.fi/icons/chains/rsz_tempo",
 };
 
 const config = getDefaultConfig({

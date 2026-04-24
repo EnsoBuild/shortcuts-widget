@@ -15,6 +15,7 @@ import {
 } from "@/util/common";
 import { useExtendedSendTransaction } from "@/util/wallet";
 import {
+  CHAINS_WITHOUT_NATIVE,
   ETH_ADDRESS,
   ONEINCH_ONLY_TOKENS,
   SupportedChainId,
@@ -84,6 +85,17 @@ export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
   });
 };
 
+const involvesNativeOnNoNativeChain = (params: CrosschainParams) => {
+  const involvesNative =
+    params.tokenIn[0] === ETH_ADDRESS || params.tokenOut[0] === ETH_ADDRESS;
+  if (!involvesNative) return false;
+  return (
+    CHAINS_WITHOUT_NATIVE.has(params.chainId) ||
+    (params.destinationChainId !== undefined &&
+      CHAINS_WITHOUT_NATIVE.has(params.destinationChainId))
+  );
+};
+
 const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
   useQuery({
     queryKey: [
@@ -105,6 +117,7 @@ const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
       isAddress(params.fromAddress) &&
       isAddress(params.tokenIn[0]) &&
       isAddress(params.tokenOut[0]) &&
+      !involvesNativeOnNoNativeChain(params) &&
       (params.tokenIn[0] !== params.tokenOut[0] ||
         (params.destinationChainId &&
           params.chainId !== params.destinationChainId)),

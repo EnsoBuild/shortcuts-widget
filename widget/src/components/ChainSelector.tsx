@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { forwardRef, useMemo } from "react";
 import { useChains } from "wagmi";
-import { STARGATE_CHAIN_NAMES, SupportedChainId } from "@/constants";
+import { getChainIconUrl, SupportedChainId } from "@/constants";
 import {
   SelectItem,
   SelectRoot,
@@ -26,7 +26,7 @@ type Chain = {
 const ChainIcon = ({ chainId }: { chainId: SupportedChainId }) => {
   const chains = useChains() as unknown as Chain[];
   const chain = chains.find((c) => c.id === chainId);
-  const iconUrl = `https://icons-ckg.pages.dev/stargate-light/networks/${STARGATE_CHAIN_NAMES[chainId]}.svg`;
+  const iconUrl = getChainIconUrl(chainId);
 
   return (
     <Box borderRadius={"50%"} overflow={"hidden"} minW={"28px"} minH={"28px"}>
