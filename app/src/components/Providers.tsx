@@ -18,7 +18,7 @@ import {
   plumeMainnet,
   worldchain,
   sei,
-  etherlink,
+  // etherlink,
   megaeth,
   tempo,
   monad,
@@ -155,10 +155,10 @@ const seiWithIcon = {
     "https://assets.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png",
 };
 
-const etherlinkWithIcon = {
-  ...etherlink,
-  iconUrl: "https://assets.coingecko.com/coins/images/976/large/Tezos-logo.png",
-};
+// const etherlinkWithIcon = {
+//   ...etherlink,
+//   iconUrl: "https://assets.coingecko.com/coins/images/976/large/Tezos-logo.png",
+// };
 
 const megaethWithIcon = {
   ...megaeth,
@@ -196,7 +196,7 @@ const config = getDefaultConfig({
     plasmaWithIcon,
     worldchain,
     seiWithIcon,
-    etherlinkWithIcon,
+    // etherlinkWithIcon,
     megaethWithIcon,
     tempoWithIcon,
   ],
