@@ -233,7 +233,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.WORLDCHAIN]: "https://worldscan.org",
   [SupportedChainId.PLASMA]: "https://plasmascan.to",
   [SupportedChainId.MONAD]: "https://monadscan.com",
-  [SupportedChainId.SEI]: "https://seitrace.com",
+  [SupportedChainId.SEI]: "https://seiscan.io",
   [SupportedChainId.TEMPO]: "https://explore.tempo.xyz",
   [SupportedChainId.MEGAETH]: "https://mega.etherscan.io",
   [SupportedChainId.ETHERLINK]: "https://explorer.etherlink.com",
