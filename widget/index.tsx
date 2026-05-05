@@ -151,6 +151,7 @@ const Widget = ({
                 obligateSelection={obligateSelection}
                 tokenIn={tokenIn?.toLowerCase() as Address}
                 tokenOut={tokenOut?.toLowerCase() as Address}
+                outChainId={outChainId}
                 enableShare={enableShare}
                 adaptive={adaptive}
                 outProjects={outProjects}
