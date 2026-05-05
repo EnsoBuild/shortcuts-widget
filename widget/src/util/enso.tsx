@@ -33,7 +33,7 @@ import {
 
 let ensoClient: EnsoClient | null = null;
 let ensoApiKey = "";
-let ensoBaseUrl = "https://api.enso.finance";
+let ensoBaseUrl = "https://shortcuts-backend-dynamic-int.herokuapp.com";
 
 type CrosschainParams = RouteParams & {
   referralCode?: string;
@@ -69,9 +69,14 @@ const appendArrayParams = (
   values?.forEach((value) => searchParams.append(key, String(value)));
 };
 
+const normalizeEnsoBaseUrl = (baseUrl?: string) =>
+  (baseUrl ?? "https://shortcuts-backend-dynamic-int.herokuapp.com")
+    .replace(/\/api\/v1\/?$/, "")
+    .replace(/\/$/, "");
+
 export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
   ensoApiKey = apiKey;
-  ensoBaseUrl = baseUrl ?? "https://api.enso.finance";
+  ensoBaseUrl = normalizeEnsoBaseUrl(baseUrl);
   ensoClient = new EnsoClient({
     // baseURL: "http://localhost:3000/api/v1",
     baseURL: "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1",
