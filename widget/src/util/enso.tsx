@@ -83,14 +83,14 @@ export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
 };
 
 const involvesNativeOnNoNativeChain = (params: CrosschainParams) => {
-  const involvesNative =
-    params.tokenIn[0] === ETH_ADDRESS || params.tokenOut[0] === ETH_ADDRESS;
-  if (!involvesNative) return false;
-  return (
-    CHAINS_WITHOUT_NATIVE.has(params.chainId) ||
-    (params.destinationChainId !== undefined &&
-      CHAINS_WITHOUT_NATIVE.has(params.destinationChainId))
-  );
+  const tokenInChain = params.chainId;
+  const tokenOutChain = params.destinationChainId ?? params.chainId;
+  const tokenInNativeOnNoNative =
+    params.tokenIn[0] === ETH_ADDRESS && CHAINS_WITHOUT_NATIVE.has(tokenInChain);
+  const tokenOutNativeOnNoNative =
+    params.tokenOut[0] === ETH_ADDRESS &&
+    CHAINS_WITHOUT_NATIVE.has(tokenOutChain);
+  return tokenInNativeOnNoNative || tokenOutNativeOnNoNative;
 };
 
 const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
