@@ -4,6 +4,10 @@
     {
       "source": "/widget/:path*",
       "destination": "/:path*"
+    },
+    {
+      "source": "/nontokenized",
+      "destination": "/index.html"
     }
   ]
 }
