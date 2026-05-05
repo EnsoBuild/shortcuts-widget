@@ -181,7 +181,7 @@ const TokenSelector = ({
     isLoading: valueTokenLoading,
   } = useEnsoToken({
     address: value,
-    priorityChainId: selectionChainId,
+    priorityChainId: chainId,
     enabled: isAddress(value),
   });
 
