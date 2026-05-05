@@ -377,9 +377,8 @@ export const useEnsoToken = ({
   );
   const priceOk = priceData?.decimals != null;
 
-  const onchainEnabled = fallbackEligible && !priceLoading && !priceOk;
   const { data: onchainToken, isLoading: onchainLoading } =
-    useOnchainTokenMetadata(singleAddress, chainId, onchainEnabled);
+    useOnchainTokenMetadata(singleAddress, chainId, fallbackEligible);
 
   const tokens: Token[] = useMemo(() => {
     if (enabled === false) return [];
@@ -445,7 +444,10 @@ export const useEnsoToken = ({
 
   const isLoading =
     ensoLoading ||
-    (fallbackEligible && (chainListLoading || priceLoading || onchainLoading));
+    (fallbackEligible &&
+      !priceOk &&
+      !onchainToken &&
+      (chainListLoading || priceLoading || onchainLoading));
 
   return { tokens, isLoading };
 };
@@ -461,7 +463,8 @@ export const useEnsoPrice = (
     queryKey: ["enso-token-price", address, chainId],
     queryFn: () => ensoClient.getPriceData({ address, chainId }),
     staleTime: 1000 * 30,
-    refetchInterval: 1000 * 30,
+    refetchInterval: (query) => (query.state.data ? 1000 * 30 : false),
+    retry: 0,
     enabled: enabled && !!chainId && isAddress(address),
   });
 };

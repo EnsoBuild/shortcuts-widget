@@ -90,6 +90,7 @@ const BridgingFee = ({
 const SwapWidget = ({
   tokenOut: providedTokenOut,
   tokenIn: providedTokenIn,
+  outChainId: providedOutChainId,
   obligateSelection,
   enableShare,
   indicateRoute,
@@ -118,7 +119,8 @@ const SwapWidget = ({
   const chainId = usePriorityChainId();
   const { chainId: wagmiChainId, address } = useAccount();
   const setOutChainId = useStore((state) => state.setTokenOutChainId);
-  const outChainId = useStore((state) => state.tokenOutChainId ?? chainId);
+  const storedOutChainId = useStore((state) => state.tokenOutChainId);
+  const outChainId = providedOutChainId ?? storedOutChainId ?? chainId;
   const obligatedChainId = useStore((state) => state.obligatedChainId);
 
   const { switchChain } = useSwitchChain();
