@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/toaster";
 import {
   useEnsoApprove,
   useEnsoData,
+  useEnsoNontokenizedData,
   useEnsoPrice,
   useEnsoToken,
 } from "@/util/enso";
@@ -41,12 +42,18 @@ import {
 } from "@/constants";
 import { useStore } from "@/store";
 import SwapInput from "@/components/SwapInput";
+import PositionSelector from "@/components/PositionSelector";
 import Notification from "@/components/Notification";
 import { ClipboardLink, ClipboardRoot } from "@/components/ui/clipboard";
 import RouteIndication from "@/components/RouteIndication";
 import { Tooltip } from "@/components/ui/tooltip";
 import Slippage from "@/components/Slippage";
-import { NotifyType, ObligatedToken, type WidgetComponentProps } from "@/types";
+import {
+  NonTokenizedPosition,
+  NotifyType,
+  ObligatedToken,
+  type WidgetComponentProps,
+} from "@/types";
 
 const BridgingFee = ({
   gasValue,
@@ -106,12 +113,18 @@ const SwapWidget = ({
   onSuccess,
   referralCode,
   fee,
+  mode = "tokenized",
+  positionOut: providedPositionOut,
+  outProtocolSlug,
 }: WidgetComponentProps) => {
   const [tokenIn, setTokenIn] = useState<Address>();
   const [valueIn, setValueIn] = useState("");
   const [warningAccepted, setWarningAccepted] = useState(false);
   const [tokenOut, setTokenOut] = useState<Address>();
+  const [positionOut, setPositionOut] = useState<string>();
+  const [positionOutData, setPositionOutData] = useState<NonTokenizedPosition>();
   const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
+  const isNontokenized = mode === "nontokenized";
   const [obligatedToken, setObligatedToken] = useState(
     obligateSelection && (rotateObligated ?? ObligatedToken.TokenOut)
   );
@@ -163,11 +176,12 @@ const SwapWidget = ({
   useEffect(() => {
     onChange?.({
       tokenIn,
-      tokenOut,
+      tokenOut: isNontokenized ? undefined : tokenOut,
+      positionOut: isNontokenized ? positionOut : undefined,
       chainId,
       outChainId,
     });
-  }, [tokenIn, tokenOut, chainId, outChainId]);
+  }, [tokenIn, tokenOut, positionOut, chainId, outChainId, isNontokenized]);
 
   // Initialize tokens when provided or when chainId changes
   useEffect(() => {
@@ -188,10 +202,16 @@ const SwapWidget = ({
     }
   }, [providedTokenOut]);
 
+  useEffect(() => {
+    if (providedPositionOut) {
+      setPositionOut(providedPositionOut);
+    }
+  }, [providedPositionOut]);
+
   // reset warning if token changes
   useEffect(() => {
     setWarningAccepted(false);
-  }, [tokenIn, tokenOut]);
+  }, [tokenIn, tokenOut, positionOut]);
 
   // Handle chain changes from outside the component
   useEffect(() => {
@@ -210,25 +230,45 @@ const SwapWidget = ({
     setValueIn("");
   }, []);
 
-  const {
-    data: routerData,
-    isLoading: routerLoading,
-    isFetching: routerIsFetching,
-    sendTransaction,
-    error,
-  } = useEnsoData(
+  const tokenizedRoute = useEnsoData(
     amountIn,
     tokenIn,
     tokenOut,
     slippage,
     referralCode,
     fee,
+    onSuccessCallback,
+    !isNontokenized
+  );
+  const nontokenizedRoute = useEnsoNontokenizedData(
+    amountIn,
+    tokenIn,
+    positionOut,
+    positionOutData,
+    slippage,
+    referralCode,
+    fee,
     onSuccessCallback
   );
+  const {
+    data: routerData,
+    isLoading: routerLoading,
+    isFetching: routerIsFetching,
+    sendTransaction,
+    error,
+  } = isNontokenized ? nontokenizedRoute : tokenizedRoute;
 
+  const positionUnderlyingToken = positionOutData?.underlyingTokens?.[0];
+  const positionOutDecimals = positionUnderlyingToken?.decimals;
+  const outputDecimals = isNontokenized
+    ? positionOutDecimals
+    : tokenOutInfo?.decimals;
   const valueOut = normalizeValue(
-    routerData?.amountOut.toString(),
-    tokenOutInfo?.decimals
+    (isNontokenized
+      ? (routerData as any)?.amountDeposited
+      : (routerData as any)?.amountOut
+    )?.toString(),
+    outputDecimals
   );
 
   const approveData = useEnsoApprove(tokenIn, amountIn);
@@ -249,18 +289,23 @@ const SwapWidget = ({
 
   const { data: inUsdPrice } = useEnsoPrice(tokenIn);
   const { data: outUsdPrice } = useEnsoPrice(tokenOut, outChainId);
+  const { data: positionUnderlyingUsdPrice } = useEnsoPrice(
+    positionUnderlyingToken?.address,
+    outChainId
+  );
 
   const tokenInUsdPrice = +(inUsdPrice?.price ?? 0) * +valueIn;
-  const tokenOutUsdPrice =
-    +(outUsdPrice?.price ?? 0) *
-    +normalizeValue(routerData?.amountOut?.toString(), tokenOutInfo?.decimals);
+  const tokenOutUsdPrice = isNontokenized
+    ? +(positionUnderlyingUsdPrice?.price ?? 0) * +valueOut
+    : +(outUsdPrice?.price ?? 0) *
+      +normalizeValue((routerData as any)?.amountOut?.toString(), tokenOutInfo?.decimals);
 
   const priceImpactValue = useMemo(() => {
     const backendPriceImpact = (routerData as any)?.priceImpact;
     if (typeof backendPriceImpact === "number") {
       return backendPriceImpact;
     }
-    if (tokenInUsdPrice > 0 && tokenOutUsdPrice >= 0 && routerData?.amountOut) {
+    if (tokenInUsdPrice > 0 && tokenOutUsdPrice >= 0 && (routerData as any)?.amountOut) {
       let priceImpact =
         ((tokenInUsdPrice - tokenOutUsdPrice) / tokenInUsdPrice) * 10000;
       priceImpact = Math.max(0, priceImpact);
@@ -289,11 +334,11 @@ const SwapWidget = ({
     priceImpactValue >= PRICE_IMPACT_WARN_THRESHOLD;
 
   const needToAcceptWarning = shouldWarnPriceImpact && !warningAccepted;
-  const swapLimitExceeded = tokenInUsdPrice > SWAP_LIMITS[tokenOut];
+  const swapLimitExceeded = !isNontokenized && tokenInUsdPrice > SWAP_LIMITS[tokenOut];
   const swapDisabled =
     !!approve ||
     wrongChain ||
-    !(+routerData?.amountOut > 0) ||
+    !(+(isNontokenized ? (routerData as any)?.amountDeposited : (routerData as any)?.amountOut) > 0) ||
     swapLimitExceeded ||
     !isBalanceEnough;
 
@@ -317,7 +362,7 @@ const SwapWidget = ({
     ? (-priceImpactValue / 100).toFixed(2)
     : "0.00";
   const priceImpactWarning = shouldWarnPriceImpact
-    ? `High price impact (${formattedPriceImpact}%). Due to the amount of ${tokenOutInfo?.symbol} liquidity currently available, the more ${tokenInInfo?.symbol} you try to swap, the less ${tokenOutInfo?.symbol} you will receive.`
+    ? `High price impact (${formattedPriceImpact}%). Due to the amount of ${isNontokenized ? positionOutData?.name : tokenOutInfo?.symbol} liquidity currently available, the more ${tokenInInfo?.symbol} you try to swap, the less ${isNontokenized ? positionOutData?.name : tokenOutInfo?.symbol} you will receive.`
     : "";
 
   const showPriceImpactWarning = useCallback(() => {
@@ -329,11 +374,12 @@ const SwapWidget = ({
   }, [priceImpactWarning, setNotification]);
 
   const limitInputTokens =
-    chainId === mainnet.id && tokenOutInfo?.symbol === "UNI-V2";
+    !isNontokenized && chainId === mainnet.id && tokenOutInfo?.symbol === "UNI-V2";
   const displayTokenRotation =
-    !obligateSelection ||
-    rotateObligated ||
-    typeof rotateObligated === "number";
+    !isNontokenized &&
+    (!obligateSelection ||
+      rotateObligated ||
+      typeof rotateObligated === "number");
 
   const gasValue = useMemo(() => {
     let txCost = +(routerData?.tx.value ?? 0);
@@ -433,11 +479,46 @@ const SwapWidget = ({
           obligatedToken={obligatedToken === ObligatedToken.TokenOut}
           loading={routerLoading || routerIsFetching}
           portalRef={portalRef}
+          title={isNontokenized ? "Estimated deposit" : undefined}
           tokenValue={tokenOut}
           tokenOnChange={setTokenOut}
           inputValue={valueOut?.toString()}
           inputOnChange={() => {}}
           usdValue={tokenOutUsdPrice}
+          selector={
+            isNontokenized ? (
+              <PositionSelector
+                value={positionOut}
+                onChange={(position) => {
+                  setPositionOut(position.positionId);
+                  setPositionOutData(position);
+                  setOutChainId(position.chainId);
+                  onChange?.({
+                    tokenIn,
+                    positionOut: position.positionId,
+                    outProtocolSlug: position.protocol,
+                    chainId,
+                    outChainId: position.chainId,
+                  });
+                }}
+                onProtocolSlugChange={(nextProtocolSlug) => {
+                  setPositionOut(undefined);
+                  setPositionOutData(undefined);
+                  onChange?.({
+                    tokenIn,
+                    positionOut: undefined,
+                    outProtocolSlug: nextProtocolSlug,
+                    chainId,
+                    outChainId,
+                  });
+                }}
+                portalRef={portalRef}
+                chainId={outChainId}
+                setChainId={setOutChainId}
+                protocolSlug={outProtocolSlug}
+              />
+            ) : undefined
+          }
         />
 
         <Box>
@@ -450,7 +531,7 @@ const SwapWidget = ({
                 w={"fit-content"}
               >
                 1 {tokenInInfo?.symbol} = {formatNumber(exchangeRate, true)}{" "}
-                {tokenOutInfo?.symbol}
+                {isNontokenized ? positionOutData?.name : tokenOutInfo?.symbol}
               </Text>
 
               {isBridging && (
@@ -523,7 +604,7 @@ const SwapWidget = ({
                     : sendTransaction.sendTransaction
                 }
               >
-                {chainId === outChainId ? "Swap" : "Bridge"}
+                {isNontokenized ? "Deposit" : chainId === outChainId ? "Swap" : "Bridge"}
               </Button>
             </Tooltip>
           </Flex>

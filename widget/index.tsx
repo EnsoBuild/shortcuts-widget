@@ -60,7 +60,10 @@ const Widget = ({
   notificationPlacement,
   referralCode,
   fee,
-  fontFamily
+  fontFamily,
+  mode,
+  positionOut,
+  outProtocolSlug,
 }: WidgetProps) => {
   const [shadow, setShadow] = useState<HTMLElement | null>(null);
   const [cache, setCache] = useState<ReturnType<typeof createCache> | null>(
@@ -143,6 +146,9 @@ const Widget = ({
             <ChakraProvider value={system}>
               <TxTracker />
               <SwapWidget
+                mode={mode}
+                positionOut={positionOut}
+                outProtocolSlug={outProtocolSlug}
                 onSuccess={onSuccess}
                 notificationPlacement={notificationPlacement}
                 outProject={outProject}

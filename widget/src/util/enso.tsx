@@ -24,9 +24,16 @@ import {
 } from "@/constants";
 import { formatNumber, normalizeValue } from ".";
 import { useTxTracker } from "./useTracker";
-import { SuccessDetails, Token } from "@/types";
+import {
+  NonTokenizedPosition,
+  NontokenizedRouteData,
+  SuccessDetails,
+  Token,
+} from "@/types";
 
 let ensoClient: EnsoClient | null = null;
+let ensoApiKey = "";
+let ensoBaseUrl = "https://api.enso.finance";
 
 type CrosschainParams = RouteParams & {
   referralCode?: string;
@@ -49,7 +56,22 @@ export const checkBridgeStatus = (
 ): Promise<BridgeStatusData> =>
   ensoClient.getBridgeStatus({ bridgeProtocol, chainId, txHash });
 
+const getEnsoHeaders = () => ({
+  Authorization: `Bearer ${ensoApiKey}`,
+  "x-enso-widget": "shortcuts",
+});
+
+const appendArrayParams = (
+  searchParams: URLSearchParams,
+  key: string,
+  values?: string[] | number[]
+) => {
+  values?.forEach((value) => searchParams.append(key, String(value)));
+};
+
 export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
+  ensoApiKey = apiKey;
+  ensoBaseUrl = baseUrl ?? "https://api.enso.finance";
   ensoClient = new EnsoClient({
     // baseURL: "http://localhost:3000/api/v1",
     baseURL: "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1",
@@ -132,7 +154,8 @@ export const useEnsoData = (
   slippage: number,
   referralCode?: string,
   fee?: { fee: number; feeReceiver: Address },
-  onSuccess?: (hash: string, details?: SuccessDetails) => void
+  onSuccess?: (hash: string, details?: SuccessDetails) => void,
+  enabled = true
 ) => {
   const { address = VITALIK_ADDRESS } = useAccount();
   const chainId = usePriorityChainId();
@@ -182,7 +205,7 @@ export const useEnsoData = (
     normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
-  const routerData = useEnsoRouterData(routerParams, true);
+  const routerData = useEnsoRouterData(routerParams, enabled);
 
   const { track } = useTxTracker();
 
@@ -226,6 +249,176 @@ export const useEnsoData = (
 };
 
 const projectProp = "projectId";
+
+type NontokenizedRouteParams = {
+  chainId: number;
+  destinationChainId?: number;
+  fromAddress: Address;
+  receiver: Address;
+  spender: Address;
+  routingStrategy: "router" | "delegate" | "delegate-legacy" | "checkout";
+  tokenIn: Address[];
+  positionOut: string;
+  amountIn: string[];
+  slippage: number;
+  referralCode?: string;
+  fee?: string[];
+  feeReceiver?: Address;
+};
+
+export const useNontokenizedPositions = ({
+  chainId,
+  protocolSlug,
+  enabled = true,
+}: {
+  chainId?: number;
+  protocolSlug?: string;
+  enabled?: boolean;
+}) =>
+  useQuery({
+    queryKey: ["enso-nontokenized", chainId, protocolSlug],
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+      if (chainId) searchParams.set("chainId", String(chainId));
+      if (protocolSlug) searchParams.set("protocolSlug", protocolSlug);
+      searchParams.set("pageSize", "1000");
+
+      const response = await fetch(
+        `${ensoBaseUrl}/api/v1/nontokenized?${searchParams.toString()}`,
+        { headers: getEnsoHeaders() }
+      );
+
+      if (!response.ok) throw new Error(await response.text());
+
+      return (await response.json()) as {
+        data: NonTokenizedPosition[];
+        meta: { total: number; perPage: number; cursor?: number };
+      };
+    },
+    enabled,
+  });
+
+const useEnsoNontokenizedRouterData = (
+  params: NontokenizedRouteParams,
+  enabled = true
+) =>
+  useQuery({
+    queryKey: [
+      "enso-nontokenized-router",
+      params.chainId,
+      params.destinationChainId,
+      params.fromAddress,
+      params.tokenIn,
+      params.positionOut,
+      params.amountIn,
+      params.fee,
+      params.feeReceiver,
+    ],
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+      searchParams.set("chainId", String(params.chainId));
+      searchParams.set("fromAddress", params.fromAddress);
+      searchParams.set("receiver", params.receiver);
+      searchParams.set("spender", params.spender);
+      searchParams.set("routingStrategy", params.routingStrategy);
+      searchParams.set("positionOut", params.positionOut);
+      searchParams.set("slippage", String(params.slippage));
+      if (params.destinationChainId) {
+        searchParams.set("destinationChainId", String(params.destinationChainId));
+      }
+      if (params.referralCode) searchParams.set("referralCode", params.referralCode);
+      if (params.feeReceiver) searchParams.set("feeReceiver", params.feeReceiver);
+      appendArrayParams(searchParams, "tokenIn", params.tokenIn);
+      appendArrayParams(searchParams, "amountIn", params.amountIn);
+      appendArrayParams(searchParams, "fee", params.fee);
+
+      const response = await fetch(
+        `${ensoBaseUrl}/api/v1/shortcuts/route/nontokenized?${searchParams.toString()}`,
+        { headers: getEnsoHeaders() }
+      );
+
+      if (!response.ok) throw new Error(await response.text());
+
+      return (await response.json()) as NontokenizedRouteData;
+    },
+    refetchInterval: 30 * 1000,
+    enabled:
+      enabled &&
+      +params.amountIn[0] > 0 &&
+      isAddress(params.fromAddress) &&
+      isAddress(params.tokenIn[0]) &&
+      Boolean(params.positionOut),
+    retry: 2,
+  });
+
+export const useEnsoNontokenizedData = (
+  amountIn: string,
+  tokenIn: Address,
+  positionOut: string | undefined,
+  positionOutData: NonTokenizedPosition | undefined,
+  slippage: number,
+  referralCode?: string,
+  fee?: { fee: number; feeReceiver: Address },
+  onSuccess?: (hash: string, details?: SuccessDetails) => void
+) => {
+  const { address = VITALIK_ADDRESS } = useAccount();
+  const chainId = usePriorityChainId();
+  const outChainId = useOutChainId();
+  const routerParams: NontokenizedRouteParams = {
+    referralCode,
+    amountIn: [amountIn],
+    tokenIn: [tokenIn],
+    positionOut: positionOut ?? "",
+    slippage,
+    fromAddress: address,
+    receiver: address,
+    spender: address,
+    routingStrategy: "router",
+    chainId,
+    ...(fee && { fee: [String(fee.fee)], feeReceiver: fee.feeReceiver }),
+  };
+
+  if (outChainId !== chainId) routerParams.destinationChainId = outChainId;
+
+  const {
+    tokens: [tokenFromData],
+  } = useEnsoToken({ address: tokenIn, enabled: isAddress(tokenIn) });
+
+  const routeTitle = `Purchase ${formatNumber(
+    normalizeValue(amountIn, tokenFromData?.decimals)
+  )} ${tokenFromData?.symbol} of ${positionOutData?.name ?? "position"}`;
+
+  const routerData = useEnsoNontokenizedRouterData(routerParams, Boolean(positionOut));
+  const { track } = useTxTracker();
+
+  const successCallback = useCallback(
+    (hash) => {
+      track({
+        hash,
+        chainId,
+        bridgeProtocol: getBridgeProtocol(routerData.data?.route),
+        message: routeTitle,
+        onConfirmed: () => {},
+      });
+
+      onSuccess?.(hash, {
+        amountIn,
+        tokenIn: tokenFromData,
+        positionOut: positionOutData,
+        slippage,
+        routerData: routerData.data,
+      });
+    },
+    [routeTitle, chainId, routerData.data, tokenFromData?.address, positionOutData?.positionId]
+  );
+
+  const sendTransaction = useExtendedSendTransaction({
+    args: routerData.data?.tx,
+    onSuccess: successCallback,
+  });
+
+  return { ...routerData, sendTransaction };
+};
 
 export const useEnsoBalances = (priorityChainId?: SupportedChainId) => {
   const { address } = useAccount();
@@ -453,7 +646,7 @@ export const useEnsoToken = ({
 };
 
 export const useEnsoPrice = (
-  address: Address,
+  address?: Address,
   priorityChainId?: SupportedChainId,
   enabled = true
 ) => {
@@ -461,11 +654,11 @@ export const useEnsoPrice = (
 
   return useQuery({
     queryKey: ["enso-token-price", address, chainId],
-    queryFn: () => ensoClient.getPriceData({ address, chainId }),
+    queryFn: () => ensoClient.getPriceData({ address: address!, chainId }),
     staleTime: 1000 * 30,
     refetchInterval: (query) => (query.state.data ? 1000 * 30 : false),
     retry: 0,
-    enabled: enabled && !!chainId && isAddress(address),
+    enabled: Boolean(enabled && !!chainId && isAddress(address)),
   });
 };
 
