@@ -96,8 +96,8 @@ const ProtocolSelector = ({
       value={value ? [value] : []}
       onValueChange={({ value }) => onChange(value[0])}
       size="md"
-      w="fit-content"
-      minWidth="240px"
+      flex={1}
+      minW="0"
       transition="all 0.2s ease-in-out"
       collection={protocolOptions}
     >
@@ -108,7 +108,7 @@ const ProtocolSelector = ({
               protocol ? (
                 <Flex alignItems="center">
                   <ProtocolIcon logoUri={protocol.logoUri} />
-                  <Text whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis" maxW="150px">
+                  <Text whiteSpace="nowrap" overflow="hidden" textOverflow="ellipsis">
                     {formatProtocolName(protocol.slug)}
                   </Text>
                 </Flex>
@@ -168,13 +168,20 @@ const PositionSelector = ({
   const [searchText, setSearchText] = useState("");
   const [selectionChainId, setSelectionChainId] = useState(chainId);
   const [selectedProtocolSlug, setSelectedProtocolSlug] = useState(protocolSlug);
-  const { data: protocolData } = useNontokenizedPositions({
-    chainId: selectionChainId,
-  });
-  const { data, isLoading } = useNontokenizedPositions({
-    chainId: selectionChainId,
-    protocolSlug: selectedProtocolSlug,
-  });
+  const { data: protocolData, isLoading: protocolsLoading } =
+    useNontokenizedPositions({
+      chainId: selectionChainId,
+    });
+  const { data: filteredData, isLoading: filteredPositionsLoading } =
+    useNontokenizedPositions({
+      chainId: selectionChainId,
+      protocolSlug: selectedProtocolSlug,
+      enabled: Boolean(selectedProtocolSlug),
+    });
+  const data = selectedProtocolSlug ? filteredData : protocolData;
+  const isLoading = selectedProtocolSlug
+    ? filteredPositionsLoading
+    : protocolsLoading;
 
   useEffect(() => {
     setSelectedProtocolSlug(protocolSlug);
@@ -223,6 +230,16 @@ const PositionSelector = ({
     [positions]
   );
 
+  useEffect(() => {
+    const selectedPosition = positions.find(
+      (position) => position.positionId === value
+    );
+    if (!selectedPosition) return;
+
+    onChange(selectedPosition);
+    setChainId?.(selectedPosition.chainId as SupportedChainId);
+  }, [positions, value, setChainId]);
+
   const onValueChange = useCallback(
     ({ value }: { value: string[] }) => {
       const [positionId] = value;
@@ -268,7 +285,7 @@ const PositionSelector = ({
         bg="bg"
       >
         <Flex height="100%" flexDirection="column" gap={2} p={2} width="100%">
-          <Flex gap={2} flexWrap="wrap">
+          <Flex gap={2} flexWrap="nowrap" width="100%">
             <ChainSelector
               value={selectionChainId}
               onChange={useCallback((nextChainId) => {
