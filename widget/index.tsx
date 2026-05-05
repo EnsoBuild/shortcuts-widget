@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChakraProvider,
   createSystem,
@@ -89,6 +89,17 @@ const Widget = ({
   const setObligatedChainId = useStore((state) => state.setObligatedChainId);
   const setTokenOutChainId = useStore((state) => state.setTokenOutChainId);
 
+  const initialSyncRef = useRef(false);
+  if (!initialSyncRef.current) {
+    if (chainId !== undefined) {
+      useStore.setState({ obligatedChainId: chainId });
+    }
+    if (outChainId !== undefined) {
+      useStore.setState({ tokenOutChainId: outChainId });
+    }
+    initialSyncRef.current = true;
+  }
+
   const system = useMemo(
     () =>
       createSystem(defaultConfig, themeConfig || {}, {
@@ -151,7 +162,6 @@ const Widget = ({
                 obligateSelection={obligateSelection}
                 tokenIn={tokenIn?.toLowerCase() as Address}
                 tokenOut={tokenOut?.toLowerCase() as Address}
-                outChainId={outChainId}
                 enableShare={enableShare}
                 adaptive={adaptive}
                 outProjects={outProjects}

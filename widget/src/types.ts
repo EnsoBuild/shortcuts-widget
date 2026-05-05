@@ -47,7 +47,6 @@ export type WidgetComponentProps = {
   adaptive?: boolean;
   tokenOut?: Address;
   tokenIn?: Address;
-  outChainId?: number;
   notificationPlacement?: Placement;
   obligateSelection?: boolean;
   enableShare?: boolean;
