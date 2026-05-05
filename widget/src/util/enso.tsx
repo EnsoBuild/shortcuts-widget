@@ -69,15 +69,21 @@ const appendArrayParams = (
   values?.forEach((value) => searchParams.append(key, String(value)));
 };
 
+const getApiRoot = (baseURL: string) =>
+  baseURL.replace(/\/api\/v1\/?$/, "").replace(/\/$/, "");
+
 export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
-  ensoApiKey = apiKey;
-  ensoBaseUrl = baseUrl ?? "https://api.enso.finance";
+  const clientBaseURL = "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1";
+  const clientApiKey = "18a49d71-3d8c-4346-87a5-1b856cb3e1dc";
+
+  ensoApiKey = clientApiKey;
+  ensoBaseUrl = getApiRoot(clientBaseURL);
   ensoClient = new EnsoClient({
     // baseURL: "http://localhost:3000/api/v1",
-    baseURL: "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1",
+    baseURL: clientBaseURL,
     // baseURL: "https://shortcuts-backend-dynamic-dev.herokuapp.com/api/v1",
     // baseURL: "https://api.enso.build/api/v1",
-    apiKey: "18a49d71-3d8c-4346-87a5-1b856cb3e1dc",
+    apiKey: clientApiKey,
   });
 
   // Add custom header to all requests
