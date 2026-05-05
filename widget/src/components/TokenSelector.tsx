@@ -117,8 +117,7 @@ const TokenSelector = ({
   const [selectionChainId, setSelectionChainId] = useState(chainId);
   const [selectedProject, setSelectedProject] = useState(project);
 
-  const { data: balances, isLoading: balancesLoading } =
-    useEnsoBalances(selectionChainId);
+  const { data: balances } = useEnsoBalances(selectionChainId);
   const {
     data: currentChainTokenList,
     isLoading: tokensLoading,
@@ -170,7 +169,6 @@ const TokenSelector = ({
       : undefined;
   const {
     tokens: [searchedToken],
-    isLoading: searchedTokenLoading,
   } = useEnsoToken({
     address: searchAddress,
     priorityChainId: selectionChainId,
@@ -181,7 +179,7 @@ const TokenSelector = ({
     isLoading: valueTokenLoading,
   } = useEnsoToken({
     address: value,
-    priorityChainId: selectionChainId,
+    priorityChainId: chainId,
     enabled: isAddress(value),
   });
 
@@ -196,7 +194,7 @@ const TokenSelector = ({
       tokens = [...tokens, searchedToken];
     }
 
-    if (valueToken) {
+    if (valueToken && selectionChainId === chainId) {
       const valueTokenIndex = hasCoincidence(tokens, valueToken.address);
       if (valueTokenIndex !== -1) tokens.splice(valueTokenIndex, 1);
       tokens.unshift(valueToken);
@@ -240,6 +238,8 @@ const TokenSelector = ({
     currentTokenList,
     searchedToken,
     valueToken,
+    selectionChainId,
+    chainId,
     limitTokens,
     excludeTokens,
   ]);
@@ -266,8 +266,11 @@ const TokenSelector = ({
 
   const onValueChange = useCallback(
     ({ value }: { value: string[] }) => {
-      onChange(value[0] as string);
-      setChainId(selectionChainId);
+      const [selectedValue] = value;
+      if (!selectedValue) return;
+
+      onChange(selectedValue);
+      setChainId?.(selectionChainId);
       setSelectionChainId(selectionChainId);
     },
     [onChange, selectionChainId, setChainId]
@@ -280,17 +283,15 @@ const TokenSelector = ({
   const onOpenChange = useCallback(
     ({ open }: { open: boolean }) => {
       if (open || obligatedToken || searchedToken) setSearchText("");
-      setSelectionChainId(chainId);
+      if (open) setSelectionChainId(chainId);
     },
     [obligatedToken, searchedToken, setSearchText, chainId]
   );
 
-  const isLoading =
-    projectTokensLoading ||
-    tokensLoading ||
-    searchedTokenLoading ||
-    valueTokenLoading ||
-    !tokensFetched;
+  const isInitialTokenListLoading =
+    tokenOptions.items.length === 0 &&
+    (projectTokensLoading || tokensLoading || !tokensFetched);
+  const isSelectedTokenLoading = valueTokenLoading && !valueToken;
 
   return (
     <SelectRoot
@@ -323,7 +324,7 @@ const TokenSelector = ({
             maxWidth={"100%"}
           >
             {(tokens: Token[]) =>
-              isLoading ? (
+              isSelectedTokenLoading ? (
                 <TokenIndicatorSkeleton />
               ) : tokens[0] ? (
                 <TokenIndicator
@@ -388,7 +389,7 @@ const TokenSelector = ({
             />
           </Box>
 
-          {isLoading && (
+          {isInitialTokenListLoading ? (
             <Stack gap={3} width="100%" padding={2}>
               {[...Array(6)].map((_, index) => (
                 <Flex
@@ -413,8 +414,7 @@ const TokenSelector = ({
                 </Flex>
               ))}
             </Stack>
-          )}
-          {
+          ) : tokenOptions.items.length ? (
             <List
               height={350}
               itemCount={tokenOptions.items.length}
@@ -436,7 +436,13 @@ const TokenSelector = ({
                 );
               }}
             </List>
-          }
+          ) : (
+            <Flex height={350} align="center" justify="center" px={4}>
+              <Text color="fg.muted" fontSize="sm" textAlign="center">
+                No tokens found
+              </Text>
+            </Flex>
+          )}
         </Flex>
       </SelectContent>
     </SelectRoot>

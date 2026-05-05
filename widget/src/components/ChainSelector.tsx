@@ -42,16 +42,17 @@ const ChainIcon = ({ chainId }: { chainId: SupportedChainId }) => {
 };
 
 // Chain indicator component to display in the dropdown
-const ChainIndicator = forwardRef<HTMLDivElement, { chain: Chain }>(
-  ({ chain }, ref) => (
-    <Flex align="center" gap={2} mr={8} ref={ref} borderRadius={"lg"}>
-      <ChainIcon chainId={chain.id} />
-      <Text fontWeight="medium" whiteSpace={"nowrap"}>
-        {chain?.name || "Unknown Chain"}
-      </Text>
-    </Flex>
-  )
-);
+const ChainIndicator = forwardRef<
+  HTMLDivElement,
+  { chain: Chain; mr?: number }
+>(({ chain, mr = 0 }, ref) => (
+  <Flex align="center" gap={2} mr={mr} ref={ref} borderRadius={"lg"}>
+    <ChainIcon chainId={chain.id} />
+    <Text fontWeight="medium" whiteSpace={"nowrap"}>
+      {chain?.name || "Unknown Chain"}
+    </Text>
+  </Flex>
+));
 
 // Chain selector component
 const ChainSelector = ({
@@ -103,7 +104,7 @@ const ChainSelector = ({
           <SelectValueText>
             {(items) =>
               items[0] ? (
-                <ChainIndicator chain={items[0]} />
+                <ChainIndicator chain={items[0]} mr={8} />
               ) : (
                 <Text whiteSpace={"nowrap"}>Select chain</Text>
               )
