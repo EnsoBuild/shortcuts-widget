@@ -51,11 +51,8 @@ export const checkBridgeStatus = (
 
 export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
   ensoClient = new EnsoClient({
-    // baseURL: "http://localhost:3000/api/v1",
-    // baseURL: "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1",
-    // baseURL: "https://shortcuts-backend-dynamic-dev.herokuapp.com/api/v1",
-    // baseURL: "https://api.enso.build/api/v1",
-    apiKey: "18a49d71-3d8c-4346-87a5-1b856cb3e1dc",
+    ...(baseUrl && { baseURL: baseUrl }),
+    apiKey,
   });
 
   // Add custom header to all requests
