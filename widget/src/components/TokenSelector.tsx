@@ -196,7 +196,7 @@ const TokenSelector = ({
       tokens = [...tokens, searchedToken];
     }
 
-    if (valueToken) {
+    if (valueToken && selectionChainId === chainId) {
       const valueTokenIndex = hasCoincidence(tokens, valueToken.address);
       if (valueTokenIndex !== -1) tokens.splice(valueTokenIndex, 1);
       tokens.unshift(valueToken);
@@ -240,6 +240,8 @@ const TokenSelector = ({
     currentTokenList,
     searchedToken,
     valueToken,
+    selectionChainId,
+    chainId,
     limitTokens,
     excludeTokens,
   ]);
