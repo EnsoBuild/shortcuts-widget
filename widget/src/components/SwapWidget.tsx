@@ -29,6 +29,7 @@ import {
 import { useApproveIfNecessary, useTokenBalance } from "@/util/wallet";
 import { getChainName, usePriorityChainId } from "@/util/common";
 import {
+  CHAINS_WITHOUT_NATIVE,
   DEFAULT_SLIPPAGE,
   ERROR_MSG,
   ETH_ADDRESS,
@@ -54,13 +55,17 @@ const BridgingFee = ({
   gasValue: string;
   chainId: number;
 }) => {
-  const { data: nativeTokenPriceData } = useEnsoPrice(ETH_ADDRESS, chainId);
+  const hasNative = !CHAINS_WITHOUT_NATIVE.has(chainId);
+  const { data: nativeTokenPriceData } = useEnsoPrice(
+    ETH_ADDRESS,
+    hasNative ? chainId : undefined
+  );
   const {
     tokens: [nativeTokenInfo],
   } = useEnsoToken({
     address: ETH_ADDRESS,
     priorityChainId: chainId,
-    enabled: !!chainId,
+    enabled: !!chainId && hasNative,
   });
 
   const gasCostUSD = +gasValue * +(nativeTokenPriceData?.price ?? 0);
@@ -166,7 +171,11 @@ const SwapWidget = ({
   useEffect(() => {
     if (providedTokenIn) {
       setTokenIn(providedTokenIn);
-    } else if (!tokenIn && !inTokens?.exclude?.includes(ETH_ADDRESS)) {
+    } else if (
+      !tokenIn &&
+      !inTokens?.exclude?.includes(ETH_ADDRESS) &&
+      !CHAINS_WITHOUT_NATIVE.has(chainId)
+    ) {
       setTokenIn(ETH_ADDRESS);
     }
   }, [providedTokenIn]);

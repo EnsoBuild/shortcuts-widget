@@ -33,7 +33,7 @@
     "react-shadow": "^20.6.0",
     "react-window": "^1.8.11",
     "url": "^0.11.4",
-    "viem": "^2.22.1",
+    "viem": "^2.48.4",
     "zustand": "^5.0.3"
   },
   "peerDependencies": {

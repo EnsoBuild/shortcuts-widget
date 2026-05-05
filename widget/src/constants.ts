@@ -85,6 +85,29 @@ const MONAD_TOKEN: Token = {
   logoURI:
     "https://assets.coingecko.com/asset_platforms/images/32276/large/monad.png",
 };
+const SEI_TOKEN: Token = {
+  address: ETH_ADDRESS,
+  name: "Sei",
+  symbol: "SEI",
+  decimals: 18,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png",
+};
+const XTZ_TOKEN: Token = {
+  address: ETH_ADDRESS,
+  name: "Tez",
+  symbol: "XTZ",
+  decimals: 18,
+  logoURI: "https://assets.coingecko.com/coins/images/976/large/Tezos-logo.png",
+};
+const XPL_TOKEN: Token = {
+  address: ETH_ADDRESS,
+  name: "Plasma",
+  symbol: "XPL",
+  decimals: 18,
+  logoURI:
+    "https://assets.coingecko.com/asset_platforms/images/32256/large/plasma.jpg",
+};
 
 export enum SupportedChainId {
   MAINNET = 1,
@@ -111,6 +134,10 @@ export enum SupportedChainId {
   WORLDCHAIN = 480,
   PLASMA = 9745,
   MONAD = 143,
+  SEI = 1329,
+  TEMPO = 4217,
+  MEGAETH = 4326,
+  ETHERLINK = 42793,
   // ARBITRUM_RINKEBY = 421611,
   // OPTIMISM_GOERLI = 420,w
   // GOERLI = 5,
@@ -144,6 +171,10 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.WORLDCHAIN]: "world-chain",
   [SupportedChainId.PLASMA]: "plasma",
   [SupportedChainId.MONAD]: "monad",
+  [SupportedChainId.SEI]: "sei-v2",
+  [SupportedChainId.TEMPO]: "tempo",
+  [SupportedChainId.MEGAETH]: "megaeth",
+  [SupportedChainId.ETHERLINK]: "etherlink",
 };
 
 export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
@@ -168,6 +199,10 @@ export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.WORLDCHAIN]: "worldchain",
   [SupportedChainId.PLASMA]: "plasma",
   [SupportedChainId.MONAD]: "monad",
+  [SupportedChainId.SEI]: "sei",
+  [SupportedChainId.TEMPO]: "tempo",
+  [SupportedChainId.MEGAETH]: "megaeth",
+  [SupportedChainId.ETHERLINK]: "etherlink",
 };
 
 export const MOCK_IMAGE_URL =
@@ -198,6 +233,10 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.WORLDCHAIN]: "https://worldscan.org",
   [SupportedChainId.PLASMA]: "https://plasmascan.to",
   [SupportedChainId.MONAD]: "https://monadscan.com",
+  [SupportedChainId.SEI]: "https://seiscan.io",
+  [SupportedChainId.TEMPO]: "https://explore.tempo.xyz",
+  [SupportedChainId.MEGAETH]: "https://mega.etherscan.io",
+  [SupportedChainId.ETHERLINK]: "https://explorer.etherlink.com",
 };
 
 // export const NATIVE_ETH_CHAINS = [
@@ -215,7 +254,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
 //   SupportedChainId.PLASMA,
 // ];
 
-export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
+export const CHAINS_NATIVE_TOKENS: Partial<Record<SupportedChainId, Token>> = {
   [SupportedChainId.MAINNET]: ETH_TOKEN,
   [SupportedChainId.ARBITRUM_ONE]: ETH_TOKEN,
   [SupportedChainId.OPTIMISM]: ETH_TOKEN,
@@ -235,9 +274,24 @@ export const CHAINS_NATIVE_TOKENS: Record<SupportedChainId, Token> = {
   [SupportedChainId.HYPERLIQUID]: HYPERLIQUID_TOKEN,
   [SupportedChainId.KATANA]: ETH_TOKEN,
   [SupportedChainId.WORLDCHAIN]: ETH_TOKEN,
-  [SupportedChainId.PLASMA]: ETH_TOKEN,
+  [SupportedChainId.PLASMA]: XPL_TOKEN,
   [SupportedChainId.MONAD]: MONAD_TOKEN,
+  [SupportedChainId.SEI]: SEI_TOKEN,
+  [SupportedChainId.MEGAETH]: ETH_TOKEN,
+  [SupportedChainId.ETHERLINK]: XTZ_TOKEN,
 };
+
+export const CHAINS_WITHOUT_NATIVE: Set<number> = new Set<number>([
+  SupportedChainId.TEMPO,
+]);
+
+export const CHAIN_ICON_OVERRIDES: Partial<Record<SupportedChainId, string>> = {
+  [SupportedChainId.TEMPO]: "https://icons.llamao.fi/icons/chains/rsz_tempo",
+};
+
+export const getChainIconUrl = (chainId: SupportedChainId) =>
+  CHAIN_ICON_OVERRIDES[chainId] ??
+  `https://icons-ckg.pages.dev/stargate-light/networks/${STARGATE_CHAIN_NAMES[chainId]}.svg`;
 
 export const SWAP_LIMITS: Record<Address, number> = {
   ["0x09def5abc67e967d54e8233a4b5ebbc1b3fbe34b"]: 100000, // WABTC limit

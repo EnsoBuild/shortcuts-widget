@@ -4,6 +4,7 @@ import { type Address, zeroAddress } from "viem";
 import {
   CHAINS_ETHERSCAN,
   CHAINS_NATIVE_TOKENS,
+  CHAINS_WITHOUT_NATIVE,
   ETH_ADDRESS,
   GECKO_CHAIN_NAMES,
   SupportedChainId,
@@ -21,7 +22,11 @@ const getGeckoList = (chainId: SupportedChainId) =>
   fetch(`https://tokens.coingecko.com/${GECKO_CHAIN_NAMES[chainId]}/all.json`)
     .then((res) => res.json())
     .then((data) => data?.tokens)
-    .then((tokens) => [CHAINS_NATIVE_TOKENS[chainId], ...tokens]);
+    .then((tokens) =>
+      CHAINS_WITHOUT_NATIVE.has(chainId)
+        ? tokens
+        : [CHAINS_NATIVE_TOKENS[chainId], ...tokens]
+    );
 
 const getOogaboogaList: () => Promise<Token[]> = () =>
   fetch(
@@ -75,8 +80,9 @@ const getOneInchTokenList = (chainId: number) =>
 // .catch(() => tokenList[chainId]);
 
 const getChainSymbolSortPriority = (chainId: SupportedChainId) => {
-  const defaultPriority = {
-    [CHAINS_NATIVE_TOKENS[chainId].symbol]: 5,
+  const nativeSymbol = CHAINS_NATIVE_TOKENS[chainId]?.symbol;
+  const defaultPriority: Record<string, number> = {
+    ...(nativeSymbol ? { [nativeSymbol]: 5 } : {}),
     ENSO: 5,
     USDC: 4,
     DAI: 4,
@@ -245,6 +251,10 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
     case SupportedChainId.SONEIUM:
     case SupportedChainId.HYPERLIQUID:
     case SupportedChainId.WORLDCHAIN:
+    case SupportedChainId.SEI:
+    case SupportedChainId.TEMPO:
+    case SupportedChainId.MEGAETH:
+    case SupportedChainId.ETHERLINK:
       getters = [getGeckoList(chainId)];
       break;
     default:

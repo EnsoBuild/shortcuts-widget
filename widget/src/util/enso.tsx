@@ -1,4 +1,4 @@
-import { useAccount } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import {
@@ -7,14 +7,16 @@ import {
   type RouteData,
   type BridgeStatusData,
 } from "@ensofinance/sdk";
-import { type Address, isAddress, isAddressEqual } from "viem";
+import { type Address, erc20Abi, isAddress, isAddressEqual } from "viem";
 import {
+  useCurrentChainList,
   usePriorityChainId,
   useOutChainId,
   useTokenFromList,
 } from "@/util/common";
 import { useExtendedSendTransaction } from "@/util/wallet";
 import {
+  CHAINS_WITHOUT_NATIVE,
   ETH_ADDRESS,
   ONEINCH_ONLY_TOKENS,
   SupportedChainId,
@@ -49,8 +51,11 @@ export const checkBridgeStatus = (
 
 export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
   ensoClient = new EnsoClient({
-    ...(baseUrl && { baseURL: baseUrl }),
-    apiKey,
+    // baseURL: "http://localhost:3000/api/v1",
+    baseURL: "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1",
+    // baseURL: "https://shortcuts-backend-dynamic-dev.herokuapp.com/api/v1",
+    // baseURL: "https://api.enso.build/api/v1",
+    apiKey: "18a49d71-3d8c-4346-87a5-1b856cb3e1dc",
   });
 
   // Add custom header to all requests
@@ -81,6 +86,17 @@ export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
   });
 };
 
+const involvesNativeOnNoNativeChain = (params: CrosschainParams) => {
+  const involvesNative =
+    params.tokenIn[0] === ETH_ADDRESS || params.tokenOut[0] === ETH_ADDRESS;
+  if (!involvesNative) return false;
+  return (
+    CHAINS_WITHOUT_NATIVE.has(params.chainId) ||
+    (params.destinationChainId !== undefined &&
+      CHAINS_WITHOUT_NATIVE.has(params.destinationChainId))
+  );
+};
+
 const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
   useQuery({
     queryKey: [
@@ -102,6 +118,7 @@ const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
       isAddress(params.fromAddress) &&
       isAddress(params.tokenIn[0]) &&
       isAddress(params.tokenOut[0]) &&
+      !involvesNativeOnNoNativeChain(params) &&
       (params.tokenIn[0] !== params.tokenOut[0] ||
         (params.destinationChainId &&
           params.chainId !== params.destinationChainId)),
@@ -251,7 +268,64 @@ const useEnsoTokenDetails = ({
   });
 };
 
-// fallback to normal token details
+const useOnchainTokenMetadata = (
+  address: Address | undefined,
+  chainId: number | undefined,
+  enabled: boolean
+) => {
+  const publicClient = usePublicClient({ chainId });
+
+  return useQuery<Token | null>({
+    queryKey: ["onchain-token", address?.toLowerCase(), chainId],
+    queryFn: async () => {
+      const tokenAddress = address as Address;
+      const [decimalsResult, symbolResult, nameResult] =
+        await publicClient.multicall({
+          allowFailure: true,
+          // Required by viem 2.48 type signature (Pick from CallParameters); empty array is a no-op at runtime.
+          authorizationList: [],
+          contracts: [
+            {
+              address: tokenAddress,
+              abi: erc20Abi,
+              functionName: "decimals",
+            },
+            {
+              address: tokenAddress,
+              abi: erc20Abi,
+              functionName: "symbol",
+            },
+            {
+              address: tokenAddress,
+              abi: erc20Abi,
+              functionName: "name",
+            },
+          ],
+        });
+
+      if (decimalsResult.status !== "success") {
+        throw new Error("decimals() failed");
+      }
+
+      const symbol =
+        symbolResult.status === "success" ? symbolResult.result : "";
+      const name = nameResult.status === "success" ? nameResult.result : symbol;
+
+      return {
+        address: tokenAddress.toLowerCase() as Address,
+        decimals: decimalsResult.result,
+        symbol,
+        name,
+        logoURI: "",
+      };
+    },
+    enabled: enabled && !!publicClient && !!address && isAddress(address),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: 0,
+  });
+};
+
 export const useEnsoToken = ({
   address,
   priorityChainId,
@@ -265,7 +339,13 @@ export const useEnsoToken = ({
   project?: string;
   enabled?: boolean;
 }) => {
-  const { data, isLoading } = useEnsoTokenDetails({
+  const chainId = usePriorityChainId(priorityChainId);
+  const isSingleAddress = typeof address === "string" && isAddress(address);
+  const singleAddress = isSingleAddress ? (address as Address) : undefined;
+  const isNative =
+    isSingleAddress && isAddressEqual(singleAddress, ETH_ADDRESS);
+
+  const { data, isLoading: ensoLoading } = useEnsoTokenDetails({
     address,
     priorityChainId,
     project,
@@ -273,32 +353,107 @@ export const useEnsoToken = ({
     enabled,
   });
   const tokenFromList = useTokenFromList(address, priorityChainId);
+  const { isLoading: chainListLoading } = useCurrentChainList(priorityChainId);
+
+  const ensoHasUsableData =
+    !!data?.data?.length && data.data[0]?.decimals != null;
+  const listMatch =
+    isSingleAddress && !isNative ? tokenFromList?.find((t) => !!t) : undefined;
+  const listOk = listMatch?.decimals != null;
+
+  const fallbackEligible =
+    enabled !== false &&
+    isSingleAddress &&
+    !isNative &&
+    !ensoLoading &&
+    !ensoHasUsableData &&
+    !chainListLoading &&
+    !listOk;
+
+  const { data: priceData, isLoading: priceLoading } = useEnsoPrice(
+    singleAddress,
+    priorityChainId,
+    fallbackEligible
+  );
+  const priceOk = priceData?.decimals != null;
+
+  const onchainEnabled = fallbackEligible && !priceLoading && !priceOk;
+  const { data: onchainToken, isLoading: onchainLoading } =
+    useOnchainTokenMetadata(singleAddress, chainId, onchainEnabled);
 
   const tokens: Token[] = useMemo(() => {
-    if (!data?.data?.length || !data?.data[0]?.decimals || !enabled) {
-      return [];
-    }
+    if (enabled === false) return [];
 
-    return data.data.map((token) => ({
-      ...token,
-      address: token?.address.toLowerCase() as Address,
-      logoURI:
-        tokenFromList?.find((t) => t?.address == token?.address)?.logoURI ??
-        token?.logosUri[0],
-      underlyingTokens: token?.underlyingTokens?.map((token) => ({
+    if (ensoHasUsableData) {
+      return data.data.map((token) => ({
         ...token,
         address: token?.address.toLowerCase() as Address,
-        logoURI: token?.logosUri[0],
-      })),
-    }));
-  }, [data, tokenFromList]);
+        logoURI:
+          tokenFromList?.find((t) => t?.address == token?.address)?.logoURI ??
+          token?.logosUri[0],
+        underlyingTokens: token?.underlyingTokens?.map((token) => ({
+          ...token,
+          address: token?.address.toLowerCase() as Address,
+          logoURI: token?.logosUri[0],
+        })),
+      }));
+    }
+
+    if (!isSingleAddress || isNative) return [];
+
+    if (listOk) {
+      return [
+        {
+          address: listMatch.address.toLowerCase() as Address,
+          name: listMatch.name,
+          symbol: listMatch.symbol,
+          decimals: listMatch.decimals,
+          logoURI: listMatch.logoURI ?? "",
+        },
+      ];
+    }
+
+    if (priceOk) {
+      return [
+        {
+          address: singleAddress.toLowerCase() as Address,
+          name: priceData.symbol,
+          symbol: priceData.symbol,
+          decimals: priceData.decimals,
+          logoURI: "",
+        },
+      ];
+    }
+
+    if (onchainToken) return [onchainToken];
+
+    return [];
+  }, [
+    enabled,
+    ensoHasUsableData,
+    data,
+    tokenFromList,
+    isSingleAddress,
+    isNative,
+    listOk,
+    listMatch,
+    priceOk,
+    priceData,
+    onchainToken,
+    singleAddress,
+  ]);
+
+  const isLoading =
+    ensoLoading ||
+    (fallbackEligible && (chainListLoading || priceLoading || onchainLoading));
 
   return { tokens, isLoading };
 };
 
 export const useEnsoPrice = (
   address: Address,
-  priorityChainId?: SupportedChainId
+  priorityChainId?: SupportedChainId,
+  enabled = true
 ) => {
   const chainId = usePriorityChainId(priorityChainId);
 
@@ -307,7 +462,7 @@ export const useEnsoPrice = (
     queryFn: () => ensoClient.getPriceData({ address, chainId }),
     staleTime: 1000 * 30,
     refetchInterval: 1000 * 30,
-    enabled: chainId && isAddress(address),
+    enabled: enabled && !!chainId && isAddress(address),
   });
 };
 

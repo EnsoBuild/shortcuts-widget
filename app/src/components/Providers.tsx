@@ -17,6 +17,12 @@ import {
   unichain,
   plumeMainnet,
   worldchain,
+  sei,
+  // etherlink,
+  megaeth,
+  tempo,
+  monad,
+  plasma,
 } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
@@ -76,6 +82,23 @@ const baseWithRpc = {
   },
 };
 
+const polygonWithRpc = {
+  ...polygon,
+  rpcUrls: {
+    default: {
+      http: [
+        "https://polygon-bor-rpc.publicnode.com",
+        "https://polygon-mainnet.public.blastapi.io",
+        "https://polygon.drpc.org",
+      ],
+      webSocket: [
+        "wss://polygon-bor-rpc.publicnode.com",
+        "wss://polygon-mainnet.public.blastapi.io",
+      ],
+    },
+  },
+};
+
 const hyperevm = {
   id: 999,
   name: "Hyperevm",
@@ -118,53 +141,33 @@ const katana = {
   },
 };
 
-const polygonWithRpc = {
-  ...polygon,
-  rpcUrls: {
-    default: {
-      http: ["https://1rpc.io/matic"],
-    },
-  },
-};
-
 const projectId = import.meta.env.VITE_RAINBOWKIT_PROJECT_ID ?? "";
 
-const plasma = {
-  id: 9745,
-  name: "Plasma",
-  logoURI:
+const plasmaWithIcon = {
+  ...plasma,
+  iconUrl:
     "https://assets.coingecko.com/asset_platforms/images/32256/large/plasma.jpg",
-  nativeCurrency: { name: "Plasma Ether", symbol: "ETH", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["https://plasma.drpc.org", "https://rpc.plasma.to"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Plasmascan",
-      url: "https://plasmascan.to",
-      apiUrl: "https://api.plasmascan.to/api",
-    },
-  },
 };
 
-const monad = {
-  id: 143,
-  name: "Monad",
-  nativeCurrency: { name: "Monad", symbol: "MON", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: ["https://rpc.monad.xyz"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "Monadscan",
-      url: "https://monadscan.com",
-      apiUrl: "https://monadscan.com/api",
-    },
-  },
+const seiWithIcon = {
+  ...sei,
+  iconUrl:
+    "https://assets.coingecko.com/coins/images/28205/large/Sei_Logo_-_Transparent.png",
+};
+
+// const etherlinkWithIcon = {
+//   ...etherlink,
+//   iconUrl: "https://assets.coingecko.com/coins/images/976/large/Tezos-logo.png",
+// };
+
+const megaethWithIcon = {
+  ...megaeth,
+  iconUrl: "https://icons-ckg.pages.dev/stargate-light/networks/megaeth.svg",
+};
+
+const tempoWithIcon = {
+  ...tempo,
+  iconUrl: "https://icons.llamao.fi/icons/chains/rsz_tempo",
 };
 
 const config = getDefaultConfig({
@@ -190,8 +193,12 @@ const config = getDefaultConfig({
     linea,
     ink,
     monad,
-    plasma,
+    plasmaWithIcon,
     worldchain,
+    seiWithIcon,
+    // etherlinkWithIcon,
+    megaethWithIcon,
+    tempoWithIcon,
   ],
 });
 const queryClient = new QueryClient();
