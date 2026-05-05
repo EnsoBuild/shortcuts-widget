@@ -234,7 +234,7 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       break;
     case SupportedChainId.SONIC:
       getters = [getGeckoList(chainId), sonicAdditionalTokens];
-
+      break;
     case SupportedChainId.PLASMA:
       getters = [plasmaTokens, getGeckoList(chainId)];
       break;
@@ -270,7 +270,7 @@ const getCurrentChainTokens = (chainId: SupportedChainId) => {
       )
       .map((result) => result.value);
 
-    const tokenList = tokens[0];
+    const tokenList = tokens[0] ?? [];
 
     if (tokens.length > 1) {
       const addedToken = new Set<string>(
@@ -327,14 +327,16 @@ export const useOneInchTokenList = () => {
 };
 
 export const useTokenFromList = (
-  tokenAddress: Address | Address[],
+  tokenAddress?: Address | Address[],
   priorityChainId?: SupportedChainId
 ) => {
   const { data } = useCurrentChainList(priorityChainId);
   const arrayData = Array.isArray(tokenAddress) ? tokenAddress : [tokenAddress];
 
   return arrayData.map((address) =>
-    data?.find((token) => token.address == address)
+    address
+      ? data?.find((token) => compareCaseInsensitive(token.address, address))
+      : undefined
   );
 };
 

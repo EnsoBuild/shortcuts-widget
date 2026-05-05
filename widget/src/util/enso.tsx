@@ -9,6 +9,7 @@ import {
 } from "@ensofinance/sdk";
 import { type Address, isAddress, isAddressEqual } from "viem";
 import {
+  compareCaseInsensitive,
   usePriorityChainId,
   useOutChainId,
   useTokenFromList,
@@ -277,33 +278,47 @@ export const useEnsoToken = ({
   project?: string;
   enabled?: boolean;
 }) => {
+  const queryEnabled = enabled ?? Boolean(address || project || protocolSlug);
   const { data, isLoading } = useEnsoTokenDetails({
     address,
     priorityChainId,
     project,
     protocolSlug,
-    enabled,
+    enabled: queryEnabled,
   });
   const tokenFromList = useTokenFromList(address, priorityChainId);
 
   const tokens: Token[] = useMemo(() => {
-    if (!data?.data?.length || !data?.data[0]?.decimals || !enabled) {
+    if (!queryEnabled) {
       return [];
     }
 
-    return data.data.map((token) => ({
-      ...token,
-      address: token?.address.toLowerCase() as Address,
-      logoURI:
-        tokenFromList?.find((t) => t?.address == token?.address)?.logoURI ??
-        token?.logosUri[0],
-      underlyingTokens: token?.underlyingTokens?.map((token) => ({
-        ...token,
-        address: token?.address.toLowerCase() as Address,
-        logoURI: token?.logosUri[0],
-      })),
-    }));
-  }, [data, tokenFromList]);
+    const ensoTokens =
+      data?.data
+        ?.filter((token) => token?.address && token?.decimals !== undefined)
+        .map((token) => {
+          const fallbackToken = tokenFromList?.find((fallbackToken) =>
+            compareCaseInsensitive(fallbackToken?.address, token.address)
+          );
+          return {
+            ...fallbackToken,
+            ...token,
+            address: token.address.toLowerCase() as Address,
+            logoURI: fallbackToken?.logoURI ?? token?.logosUri?.[0] ?? "",
+            underlyingTokens: token?.underlyingTokens?.map((token) => ({
+              ...token,
+              address: token?.address.toLowerCase() as Address,
+              logoURI: token?.logosUri?.[0] ?? "",
+            })),
+          };
+        }) ?? [];
+
+    if (ensoTokens.length) {
+      return ensoTokens;
+    }
+
+    return tokenFromList.filter(Boolean) as Token[];
+  }, [data, tokenFromList, queryEnabled]);
 
   return { tokens, isLoading };
 };
