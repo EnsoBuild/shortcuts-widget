@@ -31,6 +31,8 @@ type AppState = {
   chainId?: number;
   outChainId?: number;
   outProject?: string;
+  positionOut?: string;
+  outProtocolSlug?: string;
   obligateSelection?: boolean;
   baseUrl?: string;
 };
@@ -50,6 +52,8 @@ function App() {
     const chainIdParam = searchParams.get("chainId");
     const outChainIdParam = searchParams.get("outChainId");
     const outProjectParam = searchParams.get("outProject");
+    const positionOutParam = searchParams.get("positionOut");
+    const outProtocolSlugParam = searchParams.get("outProtocolSlug");
     const obligated = searchParams.get("obligated");
     const baseUrlParam = searchParams.get("baseUrl");
 
@@ -60,6 +64,8 @@ function App() {
     if (isAddress(tokenInParam)) newState.tokenIn = tokenInParam as Address;
     if (isAddress(tokenOutParam)) newState.tokenOut = tokenOutParam as Address;
     if (outProjectParam) newState.outProject = outProjectParam;
+    if (positionOutParam) newState.positionOut = positionOutParam;
+    if (outProtocolSlugParam) newState.outProtocolSlug = outProtocolSlugParam;
     if (obligated) newState.obligateSelection = obligated === "true";
     if (baseUrlParam) newState.baseUrl = baseUrlParam;
 
@@ -84,6 +90,11 @@ function App() {
     if (state.chainId) searchParams.set("chainId", state.chainId.toString());
     if (state.obligateSelection)
       searchParams.set("obligated", state.obligateSelection.toString());
+    if (state.positionOut) searchParams.set("positionOut", state.positionOut);
+    else searchParams.delete("positionOut");
+    if (state.outProtocolSlug)
+      searchParams.set("outProtocolSlug", state.outProtocolSlug);
+    else searchParams.delete("outProtocolSlug");
 
     navigate({ search: searchParams.toString() }, { replace: true });
   }, [state, navigate, location.search]);
@@ -96,9 +107,15 @@ function App() {
     }));
   }, []);
 
+  const isNontokenizedPage = location.pathname === "/nontokenized";
+
   // Widget props
   const widgetProps = useMemo(() => {
-    const props: ComponentProps<typeof SwapWidget> = {
+    const props: ComponentProps<typeof SwapWidget> & {
+      mode?: "tokenized" | "nontokenized";
+      positionOut?: string;
+      outProtocolSlug?: string;
+    } = {
       fontFamily: "'Favorit Mono', monospace;",
       apiKey: EnsoApiKey,
       onChange: handleStateChange,
@@ -111,12 +128,15 @@ function App() {
     if (state.tokenOut) props.tokenOut = state.tokenOut;
     if (state.outChainId) props.outChainId = state.outChainId;
     if (state.outProject) props.outProject = state.outProject;
+    if (isNontokenizedPage) props.mode = "nontokenized";
+    if (state.positionOut) props.positionOut = state.positionOut;
+    if (state.outProtocolSlug) props.outProtocolSlug = state.outProtocolSlug;
     if (state.obligateSelection)
       props.obligateSelection = state.obligateSelection;
     if (state.baseUrl) props.baseUrl = state.baseUrl;
 
     return props;
-  }, [state, handleStateChange]);
+  }, [state, handleStateChange, isNontokenizedPage]);
 
   useEffect(() => {
     // Set the title of the page from the environment variable
@@ -161,6 +181,17 @@ function App() {
         }}
       >
         <div style={{ marginTop: "70px" }}>
+          {isNontokenizedPage ? (
+            <div
+              style={{
+                textAlign: "center",
+                marginBottom: "12px",
+                fontFamily: "'Favorit Mono', monospace",
+              }}
+            >
+              Non-tokenized positions
+            </div>
+          ) : null}
           <SwapWidget {...widgetProps} enableShare adaptive />
         </div>
         <div />

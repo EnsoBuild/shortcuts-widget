@@ -364,8 +364,9 @@ const TokenSelector = ({
               onChange={useCallback(
                 (chainId) => {
                   setSelectionChainId(chainId);
+                  if (value) setChainId?.(chainId);
                 },
-                [setSelectionChainId]
+                [setSelectionChainId, setChainId, value]
               )}
             />
             <ProjectSelector

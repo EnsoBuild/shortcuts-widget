@@ -17,6 +17,7 @@ const SwapInput = ({
   tokenOnChange,
   inputValue,
   inputOnChange,
+  title,
   usdValue,
   loading,
   disabled,
@@ -26,6 +27,7 @@ const SwapInput = ({
   excludeTokens,
   project,
   projects,
+  selector,
 }: {
   chainId?: SupportedChainId;
   setChainId?: (chainId: SupportedChainId) => void;
@@ -43,6 +45,7 @@ const SwapInput = ({
   excludeTokens?: Address[];
   project?: string;
   projects?: ProjectFilter;
+  selector?: React.ReactNode;
 }) => {
   const { address } = useAccount();
   const balance = useTokenBalance(tokenValue, chainId);
@@ -79,22 +82,24 @@ const SwapInput = ({
       <Box w={"full"}>
         <Flex w={"full"}>
           <Text fontSize="sm" color="fg.muted" height="20px">
-            {tokenInInfo?.name || " "}
+            {title ?? tokenInInfo?.name ?? " "}
           </Text>
         </Flex>
         <Flex w={"full"}>
-          <TokenSelector
-            project={project}
-            projectsFilter={projects}
-            setChainId={setChainId}
-            chainId={chainId}
-            limitTokens={limitTokens}
-            excludeTokens={excludeTokens}
-            obligatedToken={obligatedToken}
-            portalRef={portalRef}
-            value={tokenValue}
-            onChange={tokenOnChange}
-          />
+          {selector ?? (
+            <TokenSelector
+              project={project}
+              projectsFilter={projects}
+              setChainId={setChainId}
+              chainId={chainId}
+              limitTokens={limitTokens}
+              excludeTokens={excludeTokens}
+              obligatedToken={obligatedToken}
+              portalRef={portalRef}
+              value={tokenValue}
+              onChange={tokenOnChange}
+            />
+          )}
 
           <Flex
             alignItems={"center"}

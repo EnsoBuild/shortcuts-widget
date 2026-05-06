@@ -1,4 +1,4 @@
-import { useAccount } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import {
@@ -7,9 +7,9 @@ import {
   type RouteData,
   type BridgeStatusData,
 } from "@ensofinance/sdk";
-import { type Address, isAddress, isAddressEqual } from "viem";
+import { type Address, erc20Abi, isAddress, isAddressEqual } from "viem";
 import {
-  compareCaseInsensitive,
+  useCurrentChainList,
   usePriorityChainId,
   useOutChainId,
   useTokenFromList,
@@ -24,9 +24,16 @@ import {
 } from "@/constants";
 import { formatNumber, normalizeValue } from ".";
 import { useTxTracker } from "./useTracker";
-import { SuccessDetails, Token } from "@/types";
+import {
+  NonTokenizedPosition,
+  NontokenizedRouteData,
+  SuccessDetails,
+  Token,
+} from "@/types";
 
 let ensoClient: EnsoClient | null = null;
+let ensoApiKey = "";
+let ensoBaseUrl = "https://api.enso.finance";
 
 type CrosschainParams = RouteParams & {
   referralCode?: string;
@@ -49,10 +56,34 @@ export const checkBridgeStatus = (
 ): Promise<BridgeStatusData> =>
   ensoClient.getBridgeStatus({ bridgeProtocol, chainId, txHash });
 
+const getEnsoHeaders = () => ({
+  Authorization: `Bearer ${ensoApiKey}`,
+  "x-enso-widget": "shortcuts",
+});
+
+const appendArrayParams = (
+  searchParams: URLSearchParams,
+  key: string,
+  values?: string[] | number[]
+) => {
+  values?.forEach((value) => searchParams.append(key, String(value)));
+};
+
+const getApiRoot = (baseURL: string) =>
+  baseURL.replace(/\/api\/v1\/?$/, "").replace(/\/$/, "");
+
 export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
+  const clientBaseURL = "https://shortcuts-backend-dynamic-int.herokuapp.com/api/v1";
+  const clientApiKey = "18a49d71-3d8c-4346-87a5-1b856cb3e1dc";
+
+  ensoApiKey = clientApiKey;
+  ensoBaseUrl = getApiRoot(clientBaseURL);
   ensoClient = new EnsoClient({
-    ...(baseUrl && { baseURL: baseUrl }),
-    apiKey,
+    // baseURL: "http://localhost:3000/api/v1",
+    baseURL: clientBaseURL,
+    // baseURL: "https://shortcuts-backend-dynamic-dev.herokuapp.com/api/v1",
+    // baseURL: "https://api.enso.build/api/v1",
+    apiKey: clientApiKey,
   });
 
   // Add custom header to all requests
@@ -84,14 +115,14 @@ export const useEnsoApprove = (tokenAddress: Address, amount: string) => {
 };
 
 const involvesNativeOnNoNativeChain = (params: CrosschainParams) => {
-  const tokenInChain = params.chainId;
-  const tokenOutChain = params.destinationChainId ?? params.chainId;
-  const tokenInNativeOnNoNative =
-    params.tokenIn[0] === ETH_ADDRESS && CHAINS_WITHOUT_NATIVE.has(tokenInChain);
-  const tokenOutNativeOnNoNative =
-    params.tokenOut[0] === ETH_ADDRESS &&
-    CHAINS_WITHOUT_NATIVE.has(tokenOutChain);
-  return tokenInNativeOnNoNative || tokenOutNativeOnNoNative;
+  const involvesNative =
+    params.tokenIn[0] === ETH_ADDRESS || params.tokenOut[0] === ETH_ADDRESS;
+  if (!involvesNative) return false;
+  return (
+    CHAINS_WITHOUT_NATIVE.has(params.chainId) ||
+    (params.destinationChainId !== undefined &&
+      CHAINS_WITHOUT_NATIVE.has(params.destinationChainId))
+  );
 };
 
 const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
@@ -129,7 +160,8 @@ export const useEnsoData = (
   slippage: number,
   referralCode?: string,
   fee?: { fee: number; feeReceiver: Address },
-  onSuccess?: (hash: string, details?: SuccessDetails) => void
+  onSuccess?: (hash: string, details?: SuccessDetails) => void,
+  enabled = true
 ) => {
   const { address = VITALIK_ADDRESS } = useAccount();
   const chainId = usePriorityChainId();
@@ -179,7 +211,7 @@ export const useEnsoData = (
     normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
-  const routerData = useEnsoRouterData(routerParams, true);
+  const routerData = useEnsoRouterData(routerParams, enabled);
 
   const { track } = useTxTracker();
 
@@ -224,6 +256,176 @@ export const useEnsoData = (
 
 const projectProp = "projectId";
 
+type NontokenizedRouteParams = {
+  chainId: number;
+  destinationChainId?: number;
+  fromAddress: Address;
+  receiver: Address;
+  spender: Address;
+  routingStrategy: "router" | "delegate" | "delegate-legacy" | "checkout";
+  tokenIn: Address[];
+  positionOut: string;
+  amountIn: string[];
+  slippage: number;
+  referralCode?: string;
+  fee?: string[];
+  feeReceiver?: Address;
+};
+
+export const useNontokenizedPositions = ({
+  chainId,
+  protocolSlug,
+  enabled = true,
+}: {
+  chainId?: number;
+  protocolSlug?: string;
+  enabled?: boolean;
+}) =>
+  useQuery({
+    queryKey: ["enso-nontokenized", chainId, protocolSlug],
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+      if (chainId) searchParams.set("chainId", String(chainId));
+      if (protocolSlug) searchParams.set("protocolSlug", protocolSlug);
+      searchParams.set("pageSize", "1000");
+
+      const response = await fetch(
+        `${ensoBaseUrl}/api/v1/nontokenized?${searchParams.toString()}`,
+        { headers: getEnsoHeaders() }
+      );
+
+      if (!response.ok) throw new Error(await response.text());
+
+      return (await response.json()) as {
+        data: NonTokenizedPosition[];
+        meta: { total: number; perPage: number; cursor?: number };
+      };
+    },
+    enabled,
+  });
+
+const useEnsoNontokenizedRouterData = (
+  params: NontokenizedRouteParams,
+  enabled = true
+) =>
+  useQuery({
+    queryKey: [
+      "enso-nontokenized-router",
+      params.chainId,
+      params.destinationChainId,
+      params.fromAddress,
+      params.tokenIn,
+      params.positionOut,
+      params.amountIn,
+      params.fee,
+      params.feeReceiver,
+    ],
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+      searchParams.set("chainId", String(params.chainId));
+      searchParams.set("fromAddress", params.fromAddress);
+      searchParams.set("receiver", params.receiver);
+      searchParams.set("spender", params.spender);
+      searchParams.set("routingStrategy", params.routingStrategy);
+      searchParams.set("positionOut", params.positionOut);
+      searchParams.set("slippage", String(params.slippage));
+      if (params.destinationChainId) {
+        searchParams.set("destinationChainId", String(params.destinationChainId));
+      }
+      if (params.referralCode) searchParams.set("referralCode", params.referralCode);
+      if (params.feeReceiver) searchParams.set("feeReceiver", params.feeReceiver);
+      appendArrayParams(searchParams, "tokenIn", params.tokenIn);
+      appendArrayParams(searchParams, "amountIn", params.amountIn);
+      appendArrayParams(searchParams, "fee", params.fee);
+
+      const response = await fetch(
+        `${ensoBaseUrl}/api/v1/shortcuts/route/nontokenized?${searchParams.toString()}`,
+        { headers: getEnsoHeaders() }
+      );
+
+      if (!response.ok) throw new Error(await response.text());
+
+      return (await response.json()) as NontokenizedRouteData;
+    },
+    refetchInterval: 30 * 1000,
+    enabled:
+      enabled &&
+      +params.amountIn[0] > 0 &&
+      isAddress(params.fromAddress) &&
+      isAddress(params.tokenIn[0]) &&
+      Boolean(params.positionOut),
+    retry: 2,
+  });
+
+export const useEnsoNontokenizedData = (
+  amountIn: string,
+  tokenIn: Address,
+  positionOut: string | undefined,
+  positionOutData: NonTokenizedPosition | undefined,
+  slippage: number,
+  referralCode?: string,
+  fee?: { fee: number; feeReceiver: Address },
+  onSuccess?: (hash: string, details?: SuccessDetails) => void
+) => {
+  const { address = VITALIK_ADDRESS } = useAccount();
+  const chainId = usePriorityChainId();
+  const outChainId = useOutChainId();
+  const routerParams: NontokenizedRouteParams = {
+    referralCode,
+    amountIn: [amountIn],
+    tokenIn: [tokenIn],
+    positionOut: positionOut ?? "",
+    slippage,
+    fromAddress: address,
+    receiver: address,
+    spender: address,
+    routingStrategy: "router",
+    chainId,
+    ...(fee && { fee: [String(fee.fee)], feeReceiver: fee.feeReceiver }),
+  };
+
+  if (outChainId !== chainId) routerParams.destinationChainId = outChainId;
+
+  const {
+    tokens: [tokenFromData],
+  } = useEnsoToken({ address: tokenIn, enabled: isAddress(tokenIn) });
+
+  const routeTitle = `Purchase ${formatNumber(
+    normalizeValue(amountIn, tokenFromData?.decimals)
+  )} ${tokenFromData?.symbol} of ${positionOutData?.name ?? "position"}`;
+
+  const routerData = useEnsoNontokenizedRouterData(routerParams, Boolean(positionOut));
+  const { track } = useTxTracker();
+
+  const successCallback = useCallback(
+    (hash) => {
+      track({
+        hash,
+        chainId,
+        bridgeProtocol: getBridgeProtocol(routerData.data?.route),
+        message: routeTitle,
+        onConfirmed: () => {},
+      });
+
+      onSuccess?.(hash, {
+        amountIn,
+        tokenIn: tokenFromData,
+        positionOut: positionOutData,
+        slippage,
+        routerData: routerData.data,
+      });
+    },
+    [routeTitle, chainId, routerData.data, tokenFromData?.address, positionOutData?.positionId]
+  );
+
+  const sendTransaction = useExtendedSendTransaction({
+    args: routerData.data?.tx,
+    onSuccess: successCallback,
+  });
+
+  return { ...routerData, sendTransaction };
+};
+
 export const useEnsoBalances = (priorityChainId?: SupportedChainId) => {
   const { address } = useAccount();
   const chainId = usePriorityChainId(priorityChainId);
@@ -265,6 +467,64 @@ const useEnsoTokenDetails = ({
   });
 };
 
+const useOnchainTokenMetadata = (
+  address: Address | undefined,
+  chainId: number | undefined,
+  enabled: boolean
+) => {
+  const publicClient = usePublicClient({ chainId });
+
+  return useQuery<Token | null>({
+    queryKey: ["onchain-token", address?.toLowerCase(), chainId],
+    queryFn: async () => {
+      const tokenAddress = address as Address;
+      const [decimalsResult, symbolResult, nameResult] =
+        await publicClient.multicall({
+          allowFailure: true,
+          // Required by viem 2.48 type signature (Pick from CallParameters); empty array is a no-op at runtime.
+          authorizationList: [],
+          contracts: [
+            {
+              address: tokenAddress,
+              abi: erc20Abi,
+              functionName: "decimals",
+            },
+            {
+              address: tokenAddress,
+              abi: erc20Abi,
+              functionName: "symbol",
+            },
+            {
+              address: tokenAddress,
+              abi: erc20Abi,
+              functionName: "name",
+            },
+          ],
+        });
+
+      if (decimalsResult.status !== "success") {
+        throw new Error("decimals() failed");
+      }
+
+      const symbol =
+        symbolResult.status === "success" ? symbolResult.result : "";
+      const name = nameResult.status === "success" ? nameResult.result : symbol;
+
+      return {
+        address: tokenAddress.toLowerCase() as Address,
+        decimals: decimalsResult.result,
+        symbol,
+        name,
+        logoURI: "",
+      };
+    },
+    enabled: enabled && !!publicClient && !!address && isAddress(address),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: 0,
+  });
+};
+
 export const useEnsoToken = ({
   address,
   priorityChainId,
@@ -278,63 +538,133 @@ export const useEnsoToken = ({
   project?: string;
   enabled?: boolean;
 }) => {
-  const queryEnabled = enabled ?? Boolean(address || project || protocolSlug);
-  const { data, isLoading } = useEnsoTokenDetails({
+  const chainId = usePriorityChainId(priorityChainId);
+  const isSingleAddress = typeof address === "string" && isAddress(address);
+  const singleAddress = isSingleAddress ? (address as Address) : undefined;
+  const isNative =
+    isSingleAddress && isAddressEqual(singleAddress, ETH_ADDRESS);
+
+  const { data, isLoading: ensoLoading } = useEnsoTokenDetails({
     address,
     priorityChainId,
     project,
     protocolSlug,
-    enabled: queryEnabled,
+    enabled,
   });
   const tokenFromList = useTokenFromList(address, priorityChainId);
+  const { isLoading: chainListLoading } = useCurrentChainList(priorityChainId);
+
+  const ensoHasUsableData =
+    !!data?.data?.length && data.data[0]?.decimals != null;
+  const listMatch = isSingleAddress
+    ? tokenFromList?.find((token) => !!token)
+    : undefined;
+  const listOk = listMatch?.decimals != null;
+
+  const fallbackEligible =
+    enabled !== false &&
+    isSingleAddress &&
+    !ensoLoading &&
+    !ensoHasUsableData &&
+    !chainListLoading &&
+    !listOk;
+
+  const { data: priceData, isLoading: priceLoading } = useEnsoPrice(
+    singleAddress,
+    priorityChainId,
+    fallbackEligible
+  );
+  const priceOk = priceData?.decimals != null;
+
+  const { data: onchainToken, isLoading: onchainLoading } =
+    useOnchainTokenMetadata(singleAddress, chainId, fallbackEligible && !isNative);
 
   const tokens: Token[] = useMemo(() => {
-    if (!queryEnabled) {
-      return [];
+    if (enabled === false) return [];
+
+    if (ensoHasUsableData) {
+      return data.data.map((token) => ({
+        ...token,
+        address: token?.address.toLowerCase() as Address,
+        logoURI:
+          tokenFromList?.find((t) => t?.address == token?.address)?.logoURI ??
+          token?.logosUri[0],
+        underlyingTokens: token?.underlyingTokens?.map((token) => ({
+          ...token,
+          address: token?.address.toLowerCase() as Address,
+          logoURI: token?.logosUri[0],
+        })),
+      }));
     }
 
-    const ensoTokens =
-      data?.data
-        ?.filter((token) => token?.address && token?.decimals !== undefined)
-        .map((token) => {
-          const fallbackToken = tokenFromList?.find((fallbackToken) =>
-            compareCaseInsensitive(fallbackToken?.address, token.address)
-          );
-          return {
-            ...fallbackToken,
-            ...token,
-            address: token.address.toLowerCase() as Address,
-            logoURI: fallbackToken?.logoURI ?? token?.logosUri?.[0] ?? "",
-            underlyingTokens: token?.underlyingTokens?.map((token) => ({
-              ...token,
-              address: token?.address.toLowerCase() as Address,
-              logoURI: token?.logosUri?.[0] ?? "",
-            })),
-          };
-        }) ?? [];
+    if (!isSingleAddress) return [];
 
-    if (ensoTokens.length) {
-      return ensoTokens;
+    if (listOk) {
+      return [
+        {
+          address: listMatch.address.toLowerCase() as Address,
+          name: listMatch.name,
+          symbol: listMatch.symbol,
+          decimals: listMatch.decimals,
+          logoURI: listMatch.logoURI ?? "",
+        },
+      ];
     }
 
-    return tokenFromList.filter(Boolean) as Token[];
-  }, [data, tokenFromList, queryEnabled]);
+    if (priceOk) {
+      return [
+        {
+          address: singleAddress.toLowerCase() as Address,
+          name: priceData.symbol,
+          symbol: priceData.symbol,
+          decimals: priceData.decimals,
+          logoURI: "",
+        },
+      ];
+    }
+
+    if (onchainToken) return [onchainToken];
+
+    return [];
+  }, [
+    enabled,
+    ensoHasUsableData,
+    data,
+    tokenFromList,
+    isSingleAddress,
+    isNative,
+    listOk,
+    listMatch,
+    priceOk,
+    priceData,
+    onchainToken,
+    singleAddress,
+  ]);
+
+  const isLoading =
+    ensoLoading ||
+    (fallbackEligible &&
+      !priceOk &&
+      !onchainToken &&
+      (chainListLoading || priceLoading || onchainLoading));
 
   return { tokens, isLoading };
 };
 
 export const useEnsoPrice = (
-  address: Address,
-  priorityChainId?: SupportedChainId
+  address?: Address,
+  priorityChainId?: SupportedChainId,
+  enabled = true
 ) => {
   const chainId = usePriorityChainId(priorityChainId);
 
   return useQuery({
     queryKey: ["enso-token-price", address, chainId],
-    queryFn: () => ensoClient.getPriceData({ address, chainId }),
+    queryFn: () => ensoClient.getPriceData({ address: address!, chainId }),
     staleTime: 1000 * 30,
-    refetchInterval: 1000 * 30,
-    enabled: chainId && isAddress(address),
+    refetchInterval: (query) => (query.state.data ? 1000 * 30 : false),
+    retry: 0,
+    enabled: Boolean(enabled && !!chainId && isAddress(address)),
   });
 };
 

@@ -51,6 +51,9 @@ type RouteSegment = Omit<RouteData["route"][0], "internalRoutes"> & {
   internalRoutes?: RouteSegment[][];
 };
 
+const getRouteOutputTokens = (step: RouteSegment) =>
+  step.tokenOut?.length ? step.tokenOut : [];
+
 const RouteSegment = ({ step }: { step: RouteSegment }) => (
   <HStack gap={0}>
     <VStack minW="50px" maxW="100px" gap={0}>
@@ -88,7 +91,7 @@ const RouteSegment = ({ step }: { step: RouteSegment }) => (
     </VStack>
 
     <VStack gap={0}>
-      {step.tokenOut.map((token, i) => (
+      {getRouteOutputTokens(step).map((token, i) => (
         <TokenBadge
           address={token}
           key={i}
@@ -129,7 +132,7 @@ const RouteIndication = ({
               {route.reduce((acc, step, currentIndex) => {
                 if (currentIndex === 0) {
                   acc.push(
-                    <VStack gap={0}>
+                    <VStack gap={0} key="route-inputs">
                       {step.tokenIn?.map((token, i) => (
                         <TokenBadge
                           address={token}
@@ -151,7 +154,9 @@ const RouteIndication = ({
                               chainId: step.chainId,
                               tokenOut:
                                 step.internalRoutes.length === 1
-                                  ? step.tokenOut || internalStep.tokenOut
+                                  ? getRouteOutputTokens(step).length
+                                    ? step.tokenOut
+                                    : internalStep.tokenOut
                                   : internalStep.tokenOut,
                             }}
                             key={i}

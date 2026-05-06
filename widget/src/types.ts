@@ -13,12 +13,41 @@ export type Token = {
   tvl?: string | number;
 };
 
+export type WidgetMode = "tokenized" | "nontokenized";
+
+export type NonTokenizedPosition = {
+  chainId: number;
+  protocol: string;
+  address: string;
+  positionId: string;
+  primaryAddress: string;
+  name?: string;
+  logosUri?: string;
+  underlyingTokens?: Token[];
+};
+
+export type NontokenizedRouteData = {
+  createdAt: number;
+  gas: string;
+  amountDeposited: string;
+  amountOut?: string;
+  priceImpact?: number | null;
+  tx: RouteData["tx"];
+  route: RouteData["route"];
+  feeAmount?: string[];
+  ensoFeeAmount?: string[];
+  userOp?: unknown;
+  bridgingEstimates?: unknown[];
+  validUntil?: number;
+};
+
 export type SuccessDetails = {
   amountIn: string;
   tokenIn: Token;
-  tokenOut: Token;
+  tokenOut?: Token;
+  positionOut?: NonTokenizedPosition;
   slippage: number;
-  routerData: RouteData;
+  routerData: RouteData | NontokenizedRouteData;
 };
 
 export type Placement =
@@ -32,6 +61,8 @@ export type Placement =
 export type WidgetState = {
   tokenIn?: Address;
   tokenOut?: Address;
+  positionOut?: string;
+  outProtocolSlug?: string;
   chainId?: number;
   outChainId?: number;
   outProject?: string;
@@ -45,8 +76,12 @@ export type ProjectFilter = {
 export type WidgetComponentProps = {
   onSuccess?: (hash: string, details?: SuccessDetails) => void;
   adaptive?: boolean;
+  mode?: WidgetMode;
   tokenOut?: Address;
   tokenIn?: Address;
+  outChainId?: number;
+  positionOut?: string;
+  outProtocolSlug?: string;
   notificationPlacement?: Placement;
   obligateSelection?: boolean;
   enableShare?: boolean;
