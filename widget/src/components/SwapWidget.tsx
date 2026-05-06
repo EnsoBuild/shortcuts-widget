@@ -172,6 +172,20 @@ const SwapWidget = ({
     [wagmiChainId, chainId, switchChain, tokenOut]
   );
 
+  const setToChainId = useCallback(
+    (newChainId: number) => {
+      setOutChainId(newChainId);
+      onChange?.({
+        tokenIn,
+        tokenOut: isNontokenized ? undefined : tokenOut,
+        positionOut: isNontokenized ? positionOut : undefined,
+        chainId,
+        outChainId: newChainId,
+      });
+    },
+    [chainId, isNontokenized, onChange, positionOut, tokenIn, tokenOut]
+  );
+
   // Notify parent of state changes when any relevant state changes
   useEffect(() => {
     onChange?.({
@@ -473,7 +487,7 @@ const SwapWidget = ({
           project={outProject}
           projects={outProjects}
           chainId={outChainId}
-          setChainId={setOutChainId}
+          setChainId={setToChainId}
           limitTokens={outTokens?.include}
           excludeTokens={outTokens?.exclude}
           obligatedToken={obligatedToken === ObligatedToken.TokenOut}
@@ -492,7 +506,7 @@ const SwapWidget = ({
                 onChange={(position) => {
                   setPositionOut(position.positionId);
                   setPositionOutData(position);
-                  setOutChainId(position.chainId);
+                  setToChainId(position.chainId);
                   onChange?.({
                     tokenIn,
                     positionOut: position.positionId,
@@ -514,7 +528,7 @@ const SwapWidget = ({
                 }}
                 portalRef={portalRef}
                 chainId={outChainId}
-                setChainId={setOutChainId}
+                setChainId={setToChainId}
                 protocolSlug={outProtocolSlug}
               />
             ) : undefined
