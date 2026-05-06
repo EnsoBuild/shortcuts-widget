@@ -556,14 +556,14 @@ export const useEnsoToken = ({
 
   const ensoHasUsableData =
     !!data?.data?.length && data.data[0]?.decimals != null;
-  const listMatch =
-    isSingleAddress && !isNative ? tokenFromList?.find((t) => !!t) : undefined;
+  const listMatch = isSingleAddress
+    ? tokenFromList?.find((token) => !!token)
+    : undefined;
   const listOk = listMatch?.decimals != null;
 
   const fallbackEligible =
     enabled !== false &&
     isSingleAddress &&
-    !isNative &&
     !ensoLoading &&
     !ensoHasUsableData &&
     !chainListLoading &&
@@ -577,7 +577,7 @@ export const useEnsoToken = ({
   const priceOk = priceData?.decimals != null;
 
   const { data: onchainToken, isLoading: onchainLoading } =
-    useOnchainTokenMetadata(singleAddress, chainId, fallbackEligible);
+    useOnchainTokenMetadata(singleAddress, chainId, fallbackEligible && !isNative);
 
   const tokens: Token[] = useMemo(() => {
     if (enabled === false) return [];
@@ -597,7 +597,7 @@ export const useEnsoToken = ({
       }));
     }
 
-    if (!isSingleAddress || isNative) return [];
+    if (!isSingleAddress) return [];
 
     if (listOk) {
       return [
