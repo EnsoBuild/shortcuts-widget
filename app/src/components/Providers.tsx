@@ -170,6 +170,25 @@ const tempoWithIcon = {
   iconUrl: "https://icons.llamao.fi/icons/chains/rsz_tempo",
 };
 
+const robinhood = {
+  id: 4663,
+  name: "Robinhood",
+  iconUrl:
+    "https://icons-ckg.pages.dev/stargate-light/networks/robinhood.svg",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.mainnet.chain.robinhood.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Robinhood Chain Explorer",
+      url: "https://robinhoodchain.blockscout.com",
+    },
+  },
+};
+
 const config = getDefaultConfig({
   appName: "Happy Path",
   projectId,
@@ -193,6 +212,7 @@ const config = getDefaultConfig({
     linea,
     ink,
     monad,
+    robinhood,
     plasmaWithIcon,
     worldchain,
     seiWithIcon,
