@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add New Chain"
+  short_description: "Add EVM chain support to the Enso widget"
+  default_prompt: "Use $add-new-chain to add a network to shortcuts-widget, validate its native-asset metadata and demo wallet configuration, and draft a brief developer PR summary."
