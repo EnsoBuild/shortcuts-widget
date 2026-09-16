@@ -173,8 +173,7 @@ const tempoWithIcon = {
 const robinhood = {
   id: 4663,
   name: "Robinhood",
-  iconUrl:
-    "https://icons-ckg.pages.dev/stargate-light/networks/robinhood.svg",
+  iconUrl: "https://icons-ckg.pages.dev/stargate-light/networks/robinhood.svg",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
@@ -185,6 +184,24 @@ const robinhood = {
     default: {
       name: "Robinhood Chain Explorer",
       url: "https://robinhoodchain.blockscout.com",
+    },
+  },
+};
+
+const arc = {
+  id: 5042,
+  name: "Arc",
+  iconUrl: "https://icons-ckg.pages.dev/stargate-light/networks/arc.svg",
+  nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.mainnet.arc.io"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Arc Explorer",
+      url: "https://explorer.arc.io",
     },
   },
 };
@@ -213,6 +230,7 @@ const config = getDefaultConfig({
     ink,
     monad,
     robinhood,
+    arc,
     plasmaWithIcon,
     worldchain,
     seiWithIcon,

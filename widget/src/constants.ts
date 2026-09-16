@@ -109,6 +109,16 @@ const XPL_TOKEN: Token = {
     "https://assets.coingecko.com/asset_platforms/images/32256/large/plasma.jpg",
 };
 
+// Arc native USDC uses 18 decimals; its ERC-20 view at 0x3600… uses 6.
+const ARC_USDC_TOKEN: Token = {
+  address: ETH_ADDRESS,
+  name: "USD Coin",
+  symbol: "USDC",
+  decimals: 18,
+  logoURI:
+    "https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png",
+};
+
 export enum SupportedChainId {
   MAINNET = 1,
   ARBITRUM_ONE = 42161,
@@ -135,6 +145,7 @@ export enum SupportedChainId {
   PLASMA = 9745,
   MONAD = 143,
   ROBINHOOD = 4663,
+  ARC = 5042,
   SEI = 1329,
   TEMPO = 4217,
   MEGAETH = 4326,
@@ -173,6 +184,7 @@ export const GECKO_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.PLASMA]: "plasma",
   [SupportedChainId.MONAD]: "monad",
   [SupportedChainId.ROBINHOOD]: "robinhood",
+  [SupportedChainId.ARC]: "arc",
   [SupportedChainId.SEI]: "sei-v2",
   [SupportedChainId.TEMPO]: "tempo",
   [SupportedChainId.MEGAETH]: "megaeth",
@@ -202,6 +214,7 @@ export const STARGATE_CHAIN_NAMES: { [key in SupportedChainId]: string } = {
   [SupportedChainId.PLASMA]: "plasma",
   [SupportedChainId.MONAD]: "monad",
   [SupportedChainId.ROBINHOOD]: "robinhood",
+  [SupportedChainId.ARC]: "arc",
   [SupportedChainId.SEI]: "sei",
   [SupportedChainId.TEMPO]: "tempo",
   [SupportedChainId.MEGAETH]: "megaeth",
@@ -237,6 +250,7 @@ export const CHAINS_ETHERSCAN: Record<SupportedChainId, string> = {
   [SupportedChainId.PLASMA]: "https://plasmascan.to",
   [SupportedChainId.MONAD]: "https://monadscan.com",
   [SupportedChainId.ROBINHOOD]: "https://robinhoodchain.blockscout.com",
+  [SupportedChainId.ARC]: "https://explorer.arc.io",
   [SupportedChainId.SEI]: "https://seiscan.io",
   [SupportedChainId.TEMPO]: "https://explore.tempo.xyz",
   [SupportedChainId.MEGAETH]: "https://mega.etherscan.io",
@@ -281,6 +295,7 @@ export const CHAINS_NATIVE_TOKENS: Partial<Record<SupportedChainId, Token>> = {
   [SupportedChainId.PLASMA]: XPL_TOKEN,
   [SupportedChainId.MONAD]: MONAD_TOKEN,
   [SupportedChainId.ROBINHOOD]: ETH_TOKEN,
+  [SupportedChainId.ARC]: ARC_USDC_TOKEN,
   [SupportedChainId.SEI]: SEI_TOKEN,
   [SupportedChainId.MEGAETH]: ETH_TOKEN,
   [SupportedChainId.ETHERLINK]: XTZ_TOKEN,
