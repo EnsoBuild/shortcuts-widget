@@ -120,17 +120,9 @@ const useFlowTraceId = (signature: string) => {
   return traceId;
 };
 
-const routeQueryKey = (params: CrosschainParams) => [
-  "enso-router",
-  params.chainId,
-  params.destinationChainId,
-  params.fromAddress,
-  params.tokenIn,
-  params.tokenOut,
-  params.amountIn,
-  params.fee,
-  params.feeReceiver,
-];
+// the trace each quote was fetched under, so its tx joins that trace even if the inputs
+// have moved on or the quote came from the cache
+const routeTraceIds = new WeakMap<object, string>();
 
 const useEnsoRouterData = (
   params: CrosschainParams,
@@ -138,11 +130,14 @@ const useEnsoRouterData = (
   enabled = true
 ) =>
   useQuery({
-    queryKey: routeQueryKey(params),
-    queryFn: () => {
+    // every route input, so a quote always matches the inputs it was fetched for
+    queryKey: ["enso-router", params],
+    queryFn: async () => {
       // the query can fire before the effect that activates the flow
       activateFlowTrace(traceId);
-      return ensoClient.getRouteData(params);
+      const route = await ensoClient.getRouteData(params);
+      if (route && typeof route === "object") routeTraceIds.set(route, traceId);
+      return route;
     },
     refetchInterval: 30 * 1000,
     enabled:
@@ -215,7 +210,6 @@ export const useEnsoData = (
     normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
-  // every route request input, including those the query key leaves out (slippage, referral)
   const traceId = useFlowTraceId(JSON.stringify(routerParams));
   const routerData = useEnsoRouterData(routerParams, traceId, true);
 
@@ -223,7 +217,8 @@ export const useEnsoData = (
 
   const successCallback = useCallback(
     (hash) => {
-      rememberTxTrace(hash, traceId);
+      const quote = routerData.data;
+      rememberTxTrace(hash, (quote && routeTraceIds.get(quote)) ?? traceId);
       track({
         hash,
         chainId,
