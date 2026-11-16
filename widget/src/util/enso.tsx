@@ -1,6 +1,6 @@
 import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   EnsoClient,
   type RouteParams,
@@ -24,6 +24,13 @@ import {
 } from "@/constants";
 import { formatNumber, normalizeValue } from ".";
 import { useTxTracker } from "./useTracker";
+import {
+  activateFlowTrace,
+  newTraceId,
+  rememberTxTrace,
+  toTraceparent,
+  traceIdForRequest,
+} from "./trace";
 import { SuccessDetails, Token } from "@/types";
 
 let ensoClient: EnsoClient | null = null;
@@ -55,10 +62,12 @@ export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
     apiKey,
   });
 
-  // Add custom header to all requests
+  // Add custom headers to all requests
   // @ts-expect-error accessing private axios client
   ensoClient.client.interceptors.request.use((config) => {
     config.headers["x-enso-widget"] = "shortcuts";
+    const traceId = traceIdForRequest(config.url, config.params);
+    if (traceId) config.headers["traceparent"] = toTraceparent(traceId);
     return config;
   });
 };
@@ -94,20 +103,47 @@ const involvesNativeOnNoNativeChain = (params: CrosschainParams) => {
   return tokenInNativeOnNoNative || tokenOutNativeOnNoNative;
 };
 
-const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
+// One trace id per set of route inputs; it is kept through approval, submission and bridge
+// status, and rotates when the inputs change.
+const useFlowTraceId = (signature: string) => {
+  const [flow, setFlow] = useState(() => ({
+    signature,
+    traceId: newTraceId(),
+  }));
+  const traceId = flow.signature === signature ? flow.traceId : newTraceId();
+  if (flow.signature !== signature) setFlow({ signature, traceId });
+
+  useEffect(() => {
+    activateFlowTrace(traceId);
+  }, [traceId]);
+
+  return traceId;
+};
+
+const routeQueryKey = (params: CrosschainParams) => [
+  "enso-router",
+  params.chainId,
+  params.destinationChainId,
+  params.fromAddress,
+  params.tokenIn,
+  params.tokenOut,
+  params.amountIn,
+  params.fee,
+  params.feeReceiver,
+];
+
+const useEnsoRouterData = (
+  params: CrosschainParams,
+  traceId: string,
+  enabled = true
+) =>
   useQuery({
-    queryKey: [
-      "enso-router",
-      params.chainId,
-      params.destinationChainId,
-      params.fromAddress,
-      params.tokenIn,
-      params.tokenOut,
-      params.amountIn,
-      params.fee,
-      params.feeReceiver,
-    ],
-    queryFn: () => ensoClient.getRouteData(params),
+    queryKey: routeQueryKey(params),
+    queryFn: () => {
+      // the query can fire before the effect that activates the flow
+      activateFlowTrace(traceId);
+      return ensoClient.getRouteData(params);
+    },
     refetchInterval: 30 * 1000,
     enabled:
       enabled &&
@@ -179,12 +215,14 @@ export const useEnsoData = (
     normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
-  const routerData = useEnsoRouterData(routerParams, true);
+  const traceId = useFlowTraceId(JSON.stringify(routeQueryKey(routerParams)));
+  const routerData = useEnsoRouterData(routerParams, traceId, true);
 
   const { track } = useTxTracker();
 
   const successCallback = useCallback(
     (hash) => {
+      rememberTxTrace(hash, traceId);
       track({
         hash,
         chainId,
@@ -205,6 +243,7 @@ export const useEnsoData = (
     [
       swapTitle,
       chainId,
+      traceId,
       routerData.data,
       tokenToData?.address,
       tokenFromData?.address,

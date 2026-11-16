@@ -16,6 +16,7 @@ import SwapWidget from "@/components/SwapWidget";
 import { useStore } from "@/store";
 import { initEnsoClient } from "@/util/enso";
 import { TxTracker } from "@/util/useTracker";
+import { registerFlowTraceForSession } from "@/util/trace";
 
 import {
   WidgetComponentProps,
@@ -138,6 +139,8 @@ const Widget = ({
     posthog.init("phc_w7nnXuFCFpuhrXLAAHrOrlr7Z0AAFHE79JybZ4bUabk", {
       api_host: "https://eu.i.posthog.com",
       person_profiles: "always",
+      // a flow can start before PostHog loads
+      loaded: registerFlowTraceForSession,
     });
   }, []);
 
