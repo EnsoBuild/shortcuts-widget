@@ -138,8 +138,16 @@ const useEnsoRouterData = (
   enabled = true
 ) =>
   useQuery({
-    // every route input, so a quote always matches the inputs it was fetched for
-    queryKey: ["enso-router", params],
+    // every route input, so a quote always matches the inputs it was fetched for, and the
+    // trace: a quote, its approval and its tx all belong to the flow on screen (a cached quote
+    // from an earlier flow with the same inputs is refetched under the current one)
+    queryKey: ["enso-router", params, traceId],
+    // an idle flow rotating its trace refetches the same inputs: keep showing that quote meanwhile
+    placeholderData: (previous, previousQuery) =>
+      previousQuery &&
+      JSON.stringify(previousQuery.queryKey[1]) === JSON.stringify(params)
+        ? previous
+        : undefined,
     queryFn: () =>
       fetchTracedRoute(params, traceId, (routeParams) =>
         ensoClient.getRouteData(routeParams)
