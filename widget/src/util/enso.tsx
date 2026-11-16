@@ -215,7 +215,8 @@ export const useEnsoData = (
     normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
-  const traceId = useFlowTraceId(JSON.stringify(routeQueryKey(routerParams)));
+  // every route request input, including those the query key leaves out (slippage, referral)
+  const traceId = useFlowTraceId(JSON.stringify(routerParams));
   const routerData = useEnsoRouterData(routerParams, traceId, true);
 
   const { track } = useTxTracker();
