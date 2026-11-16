@@ -5,6 +5,8 @@ import posthog from "posthog-js";
 // new flow.
 
 const MAX_TRACKED_TXS = 50;
+// a tab left open keeps polling the same inputs; start a new trace after this long
+export const FLOW_TRACE_MAX_AGE_MS = 10 * 60 * 1000;
 
 const randomHex = (bytes: number) =>
   Array.from(crypto.getRandomValues(new Uint8Array(bytes)), (value) =>
@@ -49,6 +51,20 @@ export const rememberTxTrace = (hash: string, traceId: string) => {
   const oldest = txTraceIds.keys().next().value;
   if (txTraceIds.size > MAX_TRACKED_TXS && oldest !== undefined)
     txTraceIds.delete(oldest);
+};
+
+// A route quote with the trace it was fetched under. The query caches this pair, so a quote
+// served from the cache (or kept after a failed refetch) still names its own trace.
+export type TracedRoute<T> = { route: T; traceId: string };
+
+export const fetchTracedRoute = async <P, T>(
+  params: P,
+  traceId: string,
+  fetchRoute: (params: P) => Promise<T>
+): Promise<TracedRoute<T>> => {
+  // the query can fire before the effect that activates the flow
+  activateFlowTrace(traceId);
+  return { route: await fetchRoute(params), traceId };
 };
 
 const FLOW_ENDPOINTS = new Set(["/shortcuts/route", "/wallet/approve"]);
