@@ -1,6 +1,6 @@
 import { useAccount } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   EnsoClient,
   type RouteParams,
@@ -24,6 +24,15 @@ import {
 } from "@/constants";
 import { formatNumber, normalizeValue } from ".";
 import { useTxTracker } from "./useTracker";
+import {
+  activateFlowTrace,
+  fetchTracedRoute,
+  FLOW_TRACE_MAX_AGE_MS,
+  newTraceId,
+  rememberTxTrace,
+  toTraceparent,
+  traceIdForRequest,
+} from "./trace";
 import { SuccessDetails, Token } from "@/types";
 
 let ensoClient: EnsoClient | null = null;
@@ -55,10 +64,12 @@ export const initEnsoClient = (apiKey: string, baseUrl?: string) => {
     apiKey,
   });
 
-  // Add custom header to all requests
+  // Add custom headers to all requests
   // @ts-expect-error accessing private axios client
   ensoClient.client.interceptors.request.use((config) => {
     config.headers["x-enso-widget"] = "shortcuts";
+    const traceId = traceIdForRequest(config.url, config.params);
+    if (traceId) config.headers["traceparent"] = toTraceparent(traceId);
     return config;
   });
 };
@@ -94,20 +105,53 @@ const involvesNativeOnNoNativeChain = (params: CrosschainParams) => {
   return tokenInNativeOnNoNative || tokenOutNativeOnNoNative;
 };
 
-const useEnsoRouterData = (params: CrosschainParams, enabled = true) =>
+// One trace id per set of route inputs; it is kept through approval, submission and bridge
+// status, and rotates when the inputs change or after FLOW_TRACE_MAX_AGE_MS on the same inputs.
+const useFlowTraceId = (signature: string) => {
+  const [flow, setFlow] = useState(() => ({
+    signature,
+    traceId: newTraceId(),
+  }));
+  const traceId = flow.signature === signature ? flow.traceId : newTraceId();
+  if (flow.signature !== signature) setFlow({ signature, traceId });
+
+  useEffect(() => {
+    activateFlowTrace(traceId);
+    const timer = setTimeout(
+      () =>
+        setFlow((current) =>
+          current.traceId === traceId
+            ? { signature: current.signature, traceId: newTraceId() }
+            : current
+        ),
+      FLOW_TRACE_MAX_AGE_MS
+    );
+    return () => clearTimeout(timer);
+  }, [traceId]);
+
+  return traceId;
+};
+
+const useEnsoRouterData = (
+  params: CrosschainParams,
+  traceId: string,
+  enabled = true
+) =>
   useQuery({
-    queryKey: [
-      "enso-router",
-      params.chainId,
-      params.destinationChainId,
-      params.fromAddress,
-      params.tokenIn,
-      params.tokenOut,
-      params.amountIn,
-      params.fee,
-      params.feeReceiver,
-    ],
-    queryFn: () => ensoClient.getRouteData(params),
+    // every route input, so a quote always matches the inputs it was fetched for, and the
+    // trace: a quote, its approval and its tx all belong to the flow on screen (a cached quote
+    // from an earlier flow with the same inputs is refetched under the current one)
+    queryKey: ["enso-router", params, traceId],
+    // an idle flow rotating its trace refetches the same inputs: keep showing that quote meanwhile
+    placeholderData: (previous, previousQuery) =>
+      previousQuery &&
+      JSON.stringify(previousQuery.queryKey[1]) === JSON.stringify(params)
+        ? previous
+        : undefined,
+    queryFn: () =>
+      fetchTracedRoute(params, traceId, (routeParams) =>
+        ensoClient.getRouteData(routeParams)
+      ),
     refetchInterval: 30 * 1000,
     enabled:
       enabled &&
@@ -179,12 +223,17 @@ export const useEnsoData = (
     normalizeValue(amountIn, tokenFromData?.decimals)
   )} ${tokenFromData?.symbol} of ${tokenToData?.symbol}`;
 
-  const routerData = useEnsoRouterData(routerParams, true);
+  const traceId = useFlowTraceId(JSON.stringify(routerParams));
+  const routeQuery = useEnsoRouterData(routerParams, traceId, true);
+  const routerData = { ...routeQuery, data: routeQuery.data?.route };
+  // the trace the quote on screen was fetched under, which may predate the current flow
+  const quoteTraceId = routeQuery.data?.traceId;
 
   const { track } = useTxTracker();
 
   const successCallback = useCallback(
     (hash) => {
+      rememberTxTrace(hash, quoteTraceId ?? traceId);
       track({
         hash,
         chainId,
@@ -205,6 +254,8 @@ export const useEnsoData = (
     [
       swapTitle,
       chainId,
+      traceId,
+      quoteTraceId,
       routerData.data,
       tokenToData?.address,
       tokenFromData?.address,
